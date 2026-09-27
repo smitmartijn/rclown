@@ -1,4 +1,8 @@
+require "open3"
+require "timeout"
+
 class Rclone::BucketLister
+  TIMEOUT = 2.minutes
   attr_reader :provider
 
   def initialize(provider)
@@ -7,11 +11,9 @@ class Rclone::BucketLister
 
   def list
     config_file = generate_temp_config
-    output = execute_rclone(config_file)
-    parse_bucket_list(output)
+    parse_bucket_list(execute_rclone(config_file))
   ensure
-    config_file&.close
-    config_file&.unlink
+    config_file&.close!
   end
 
   private
@@ -23,25 +25,44 @@ class Rclone::BucketLister
     end
 
     def execute_rclone(config_file)
-      command = [
-        "rclone", "lsd", "remote:",
-        "--config", config_file.path
-      ]
-
-      stdout, stderr, status = Open3.capture3(*command)
-
-      unless status.success?
-        raise Rclone::Error, "Failed to list buckets: #{stderr}"
+      command = [ "rclone", "lsjson", "remote:", "--dirs-only", "--config", config_file.path ]
+      Open3.popen3(*command, pgroup: true) do |stdin, stdout, stderr, process|
+        stdin.close
+        readers = [ Thread.new { stdout.read }, Thread.new { stderr.read } ]
+        begin
+          status = Timeout.timeout(TIMEOUT.to_i) { process.value }
+          output, error = readers.map(&:value)
+          unless status.success?
+            [ provider.access_key_id, provider.secret_access_key ].compact_blank.each { |secret| error.gsub!(secret, "[FILTERED]") }
+            raise Rclone::Error, "Failed to list buckets: #{error.truncate(1000)}"
+          end
+          output
+        rescue Timeout::Error
+          terminate(process)
+          raise Rclone::Error, "Bucket discovery timed out after #{TIMEOUT.to_i} seconds"
+        ensure
+          readers.each(&:join)
+        end
       end
+    end
 
-      stdout
+    def terminate(process)
+      Process.kill("TERM", -process.pid)
+      unless process.join(2)
+        Process.kill("KILL", -process.pid)
+        process.join
+      end
+    rescue Errno::ESRCH
+      # The subprocess exited while being terminated.
     end
 
     def parse_bucket_list(output)
-      output.lines.filter_map do |line|
-        # rclone lsd output format: "          -1 2024-01-01 00:00:00        -1 bucket-name"
-        parts = line.strip.split(/\s+/)
-        parts.last if parts.length >= 5
-      end.sort
+      entries = JSON.parse(output)
+      unless entries.is_a?(Array) && entries.all? { |entry| entry.is_a?(Hash) && entry["IsDir"] == true && entry["Name"].is_a?(String) && entry["Name"].present? }
+        raise Rclone::Error, "Bucket discovery returned an invalid directory listing"
+      end
+      entries.map { |entry| entry.fetch("Name") }.uniq.sort
+    rescue JSON::ParserError
+      raise Rclone::Error, "Bucket discovery returned invalid JSON"
     end
 end

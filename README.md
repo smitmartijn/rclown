@@ -11,6 +11,7 @@ Rclown wraps the battle-tested [rclone](https://rclone.org/) in a simple interfa
 - **Multi-provider support**: Cloudflare R2, Backblaze B2, Amazon S3
 - **Local destinations**: Back up cloud buckets to a local directory or Docker-mounted NAS storage ([setup](docs/docker-deployment.md#back-up-cloud-buckets-to-a-nas--local-filesystem))
 - **Bucket discovery**: Automatically find and import buckets from your providers
+- **Account backups**: Discover new buckets automatically, copy backup defaults, and exclude bucket names or patterns ([setup](docs/account-backups.md))
 - **Scheduled backups**: Daily or weekly, with dry-run support
 - **Flexible paths**: Back up entire buckets or specific sub-paths
 - **Retention policies**: Deleted files kept for configurable period before cleanup

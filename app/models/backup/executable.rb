@@ -1,15 +1,17 @@
 module Backup::Executable
   extend ActiveSupport::Concern
 
-  def execute(dry_run: false)
-    return nil if running? && !dry_run
+  def execute(dry_run: false, scheduled: false)
+    run = with_lock do
+      touch
+      next if scheduled && !due?
+      next if account_hold_reason
+      next if !dry_run && (runs.running.exists? || runs.pending.where(dry_run: false).exists?)
 
-    runs.create!(
-      dry_run: dry_run,
-      **run_paths
-    ).tap do |run|
-      run.execute_later
+      runs.create!(dry_run: dry_run, **run_paths)
     end
+    run&.execute_later
+    run
   end
 
   def running?

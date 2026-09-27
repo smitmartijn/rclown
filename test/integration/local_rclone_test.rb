@@ -10,6 +10,17 @@ class LocalRcloneTest < ActiveSupport::TestCase
   end
   teardown { teardown_local_destination }
 
+  test "real rclone bucket discovery uses a structured listing" do
+    provider = providers(:cloudflare)
+    source_root = File.join(@local_root, "test buckets")
+    FileUtils.mkdir_p(File.join(source_root, "first"))
+    FileUtils.mkdir_p(File.join(source_root, "second"))
+    config = "[remote]\ntype = alias\nremote = #{source_root}\n"
+    provider.stub :rclone_config_section, config do
+      assert_equal [ "first", "second" ], Rclone::BucketLister.new(provider).list
+    end
+  end
+
   test "real rclone sync verifies archives overwritten and deleted files and cleans up" do
     # Substitute an alias remote for cloud access; exercise the actual executor,
     # local backend, verification and cleanup without external credentials.
@@ -19,11 +30,14 @@ class LocalRcloneTest < ActiveSupport::TestCase
     File.write(File.join(source, "changed.txt"), "original")
     File.write(File.join(source, "deleted.txt"), "deleted later")
     File.write(File.join(source, "space ; 'quoted'.txt"), "special characters")
-    provider = @local_backup.source_storage.provider
     config = "[source]\ntype = alias\nremote = #{source_root}\n"
     destination = @local_backup.destination_rclone_path
 
-    provider.stub :rclone_config_section, config do
+    generator = Object.new
+    generator.define_singleton_method(:generate) do
+      Tempfile.new([ "rclone-test", ".conf" ]).tap { |file| file.write(config); file.flush }
+    end
+    Rclone::ConfigGenerator.stub :new, generator do
       dry_run = @local_backup.execute(dry_run: true)
       dry_run.execute
       assert dry_run.success?, dry_run.raw_log

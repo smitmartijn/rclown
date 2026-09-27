@@ -6,10 +6,10 @@ class ScheduleBackupsJob < ApplicationJob
 
     Backup.enabled.find_each do |backup|
       next unless backup.due?
-      next if backup.running?
+      next if backup.running? || backup.account_hold_reason
 
       Rails.logger.info "Scheduling backup: #{backup.name}"
-      backup.execute
+      backup.execute(scheduled: true)
     end
   end
 

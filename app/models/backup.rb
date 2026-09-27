@@ -1,5 +1,5 @@
 class Backup < ApplicationRecord
-  include Executable, Schedulable, Enableable, Cancellable
+  include Executable, Schedulable, Enableable, Cancellable, AccountManaged
 
   enum :comparison_mode, { default: 0, size_only: 1, checksum: 2 }
 
@@ -11,6 +11,9 @@ class Backup < ApplicationRecord
   def runs_by_day(days: 30)
     runs.where(dry_run: false, created_at: days.days.ago..).group_by { |r| r.created_at.to_date }
   end
+
+  validates :retention_days, numericality: { only_integer: true, greater_than: 0 }
+  validates :verify_tolerance_percent, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
 
   validate :source_and_destination_differ
   validate :source_storage_allows_source_usage
@@ -54,6 +57,7 @@ class Backup < ApplicationRecord
   end
 
   def validate_destination!(inspect_tree: false)
+    validate_account_destination!
     provider = destination_storage.provider
     provider.validate_destination!(destination_path, inspect_tree: inspect_tree)
     provider.validate_destination!(".deleted/backups/#{id}", retention: true, inspect_tree: inspect_tree)

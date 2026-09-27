@@ -38,6 +38,9 @@
           <span class="text-sm text-gray-500"><%= backup.schedule.capitalize %></span>
           <%= render "backups/status_badge", backup: backup %>
         </div>
+        <% if backup.account_backup %>
+          <p class="mt-1 text-xs text-blue-600">Account: <%= backup.account_backup.name %><%= " · On hold" if backup.account_hold_reason %></p>
+        <% end %>
         <p class="mt-1 text-sm text-gray-500">
           <% if backup.last_run_at %>
             Last run <%= time_ago_in_words(backup.last_run_at) %> ago

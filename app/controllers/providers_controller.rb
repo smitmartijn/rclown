@@ -34,8 +34,11 @@ class ProvidersController < ApplicationController
   end
 
   def destroy
-    @provider.destroy!
-    redirect_to providers_path, notice: "Provider was successfully deleted.", status: :see_other
+    if @provider.destroy
+      redirect_to providers_path, notice: "Provider was successfully deleted.", status: :see_other
+    else
+      redirect_to @provider, alert: @provider.errors.full_messages.to_sentence
+    end
   end
 
   private

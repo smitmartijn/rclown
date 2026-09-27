@@ -1,6 +1,13 @@
 <% page_header "System Health" %>
 
 <div class="space-y-6">
+  <% account_warnings = AccountBackup.active.filter_map { |account| (message = account.attention_message) ? [account, message] : nil } %>
+  <% if account_warnings.any? %>
+    <div class="rounded-2xl border-2 border-amber-200 p-6">
+      <h2 class="font-semibold text-gray-900">Account discovery</h2>
+      <% account_warnings.each do |account, message| %><p class="mt-2 text-sm text-amber-700"><%= link_to account.name, account, class: "underline" %>: <%= message %></p><% end %>
+    </div>
+  <% end %>
   <%# System Stats %>
   <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
     <div class="rounded-2xl border-2 border-gray-200 px-4 py-5">

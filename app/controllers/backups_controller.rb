@@ -2,7 +2,7 @@ class BackupsController < ApplicationController
   before_action :set_backup, only: %i[show edit update destroy]
 
   def index
-    @backups = Backup.includes(source_storage: :provider, destination_storage: :provider)
+    @backups = Backup.includes(account_backup_bucket: :account_backup, source_storage: :provider, destination_storage: :provider)
                      .order(created_at: :desc)
   end
 
@@ -46,6 +46,6 @@ class BackupsController < ApplicationController
     end
 
     def backup_params
-      params.require(:backup).permit(:name, :source_storage_id, :destination_storage_id, :source_path, :destination_path, :schedule, :enabled, :comparison_mode, :verify_enabled, :verify_tolerance_percent)
+      params.require(:backup).permit(:name, :source_storage_id, :destination_storage_id, :source_path, :destination_path, :schedule, :enabled, :comparison_mode, :verify_enabled, :verify_tolerance_percent, :retention_days)
     end
 end

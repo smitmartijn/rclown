@@ -1,4 +1,7 @@
 <% page_header @provider.name do %>
+  <% if @provider.supports_bucket_discovery? %>
+    <%= link_to "Back up this account", @provider.account_backup || new_account_backup_path(provider_id: @provider.id), class: "mr-3 inline-flex items-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white" %>
+  <% end %>
   <%= link_to "Edit", edit_provider_path(@provider), class: "inline-flex items-center rounded-xl border-2 border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50" %>
   <%= button_to "Delete", @provider, method: :delete, class: "ml-3 inline-flex items-center rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-500", data: { turbo_confirm: "Are you sure you want to delete this provider? All associated storages will also be deleted." } %>
 <% end %>

@@ -6,7 +6,7 @@ module Backups
       if @backup.execute
         redirect_to @backup, notice: "Backup started."
       else
-        redirect_to @backup, alert: "Backup is already running."
+        redirect_to @backup, alert: @backup.account_hold_reason || "Backup is already pending or running."
       end
     end
   end

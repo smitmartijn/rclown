@@ -261,3 +261,13 @@ destination can be moved into retention.
 
 See [retention behavior](backup-retention.md#local-filesystem-destinations) for
 local archive layout and the existing modification-time retention semantics.
+
+## Automatically back up every bucket
+
+After configuring a local destination, open **Account backups** to discover all
+visible source buckets, reuse matching existing backups and create backups for
+new buckets automatically. Leave the destination prefix blank for
+`/backups/<bucket-name>`. See [account backup setup](account-backups.md).
+Discovery, backups and cleanup require `SOLID_QUEUE_IN_PUMA=true` in a
+single-container deployment, or a separately running job worker with the same
+database and backup mounts.

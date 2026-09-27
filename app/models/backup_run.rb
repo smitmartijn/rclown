@@ -26,6 +26,13 @@ class BackupRun < ApplicationRecord
   after_create :update_backup_last_run_at
 
   def execute
+    backup.reload
+    if reason = backup.account_hold_reason
+      append_log("Skipped: #{reason}\n")
+      update!(status: :skipped, finished_at: Time.current)
+      return
+    end
+
     running!
     update!(started_at: Time.current, worker_pid: Process.pid)
     clear_log

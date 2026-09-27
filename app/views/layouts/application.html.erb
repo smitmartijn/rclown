@@ -42,6 +42,13 @@
               Backups
             <% end %>
 
+            <%= link_to account_backups_path, class: "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl #{request.path.start_with?('/account_backups') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}" do %>
+              <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h6v6h-6zM14.25 3.75h6v6h-6zM3.75 14.25h6v6h-6zM14.25 14.25h6v6h-6z" />
+              </svg>
+              Account backups
+            <% end %>
+
             <%= link_to providers_path, class: "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl #{request.path.start_with?('/providers') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}" do %>
               <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 0 0 4.5 4.5H18a3.75 3.75 0 0 0 1.332-7.257 3 3 0 0 0-3.758-3.848 5.25 5.25 0 0 0-10.233 2.33A4.502 4.502 0 0 0 2.25 15Z" />
@@ -80,6 +87,7 @@
         </div>
         <div class="flex border-t border-gray-200">
           <%= link_to "Backups", backups_path, class: "flex-1 py-2 text-center text-sm font-medium #{request.path.start_with?('/backups') || request.path == '/' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600'}" %>
+          <%= link_to "Accounts", account_backups_path, class: "flex-1 py-2 text-center text-sm font-medium text-gray-600" %>
           <%= link_to "Providers", providers_path, class: "flex-1 py-2 text-center text-sm font-medium #{request.path.start_with?('/providers') ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600'}" %>
           <%= link_to "Storages", storages_path, class: "flex-1 py-2 text-center text-sm font-medium #{request.path.start_with?('/storages') ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600'}" %>
           <%= link_to "Notifiers", notifiers_path, class: "flex-1 py-2 text-center text-sm font-medium #{request.path.start_with?('/notifiers') ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600'}" %>

@@ -1,6 +1,8 @@
 class Storage < ApplicationRecord
   belongs_to :provider
 
+  has_many :account_backups, foreign_key: :destination_storage_id, dependent: :restrict_with_error
+
   has_many :source_backups, class_name: "Backup", foreign_key: :source_storage_id, dependent: :restrict_with_error
   has_many :destination_backups, class_name: "Backup", foreign_key: :destination_storage_id, dependent: :restrict_with_error
 
@@ -9,6 +11,7 @@ class Storage < ApplicationRecord
   validates :bucket_name, presence: true
   validate :usage_type_compatible_with_existing_backups, if: :usage_type_changed?
   validate :local_root_storage
+  validate :managed_source_identity_unchanged
   validate :provider_compatible_with_existing_backups, if: :provider_id_changed?
 
   scope :available_as_source, -> { where(usage_type: [ nil, :source_only ], provider_id: Provider.available_as_source.select(:id)) }
@@ -40,10 +43,16 @@ class Storage < ApplicationRecord
   end
 
   def in_use?
-    backups.exists?
+    backups.exists? || account_backups.exists?
   end
 
   private
+    def managed_source_identity_unchanged
+      if persisted? && (bucket_name_changed? || provider_id_changed?) && source_backups.joins(:account_backup_bucket).exists?
+        errors.add(:base, "Cannot change source bucket identity while it is used by an account-managed backup; detach that backup first")
+      end
+    end
+
     def local_root_storage
       return unless provider&.local?
 
@@ -65,7 +74,7 @@ class Storage < ApplicationRecord
         errors.add(:usage_type, "cannot be changed to destination-only while this storage is used as a source in existing backups. Please update or remove those backups first.")
       end
 
-      if usage_type_source_only? && destination_backups.exists?
+      if usage_type_source_only? && (destination_backups.exists? || account_backups.exists?)
         errors.add(:usage_type, "cannot be changed to source-only while this storage is used as a destination in existing backups. Please update or remove those backups first.")
       end
     end

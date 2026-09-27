@@ -10,15 +10,19 @@
     </div>
   <% end %>
 
+  <% if backup.account_backup %>
+    <p class="text-sm text-gray-600">Managed by <%= link_to backup.account_backup.name, backup.account_backup, class: "text-blue-600" %>. Your settings will be preserved. To change the source, detach this backup on the account page. Deleting this backup also excludes its bucket from account discovery.</p>
+  <% end %>
+
   <div class="flex items-start gap-4">
     <div class="flex-1 space-y-4">
       <div>
         <%= form.label :source_storage_id, "Source", class: "block text-sm font-semibold text-gray-700 mb-2" %>
-        <%= form.collection_select :source_storage_id, Storage.available_as_source.includes(:provider).order(:bucket_name), :id, ->(s) { "#{s.name} (#{s.provider.name})" }, { include_blank: "Select source" }, { autofocus: true } %>
+        <%= form.collection_select :source_storage_id, Storage.available_as_source.includes(:provider).order(:bucket_name), :id, ->(s) { "#{s.name} (#{s.provider.name})" }, { include_blank: "Select source" }, { autofocus: true, disabled: backup.account_backup.present? } %>
       </div>
       <div>
         <%= form.label :source_path, "Source Path", class: "block text-sm font-semibold text-gray-700 mb-2" %>
-        <%= form.text_field :source_path, class: "font-mono", placeholder: "path/within/bucket" %>
+        <%= form.text_field :source_path, disabled: backup.account_backup.present?, class: "font-mono", placeholder: "path/within/bucket" %>
         <p class="mt-1 text-xs text-gray-500">Optional path within the bucket</p>
       </div>
     </div>
@@ -69,6 +73,11 @@
       <% end %>
     </div>
     <p class="mt-2 text-xs text-gray-500">Default: size + modification time. Size Only: compare sizes only (good for migration). Checksum: compare by hash (thorough but slower).</p>
+  </div>
+
+  <div>
+    <%= form.label :retention_days, "Retention days", class: "block text-sm font-semibold text-gray-700 mb-2" %>
+    <%= form.number_field :retention_days, min: 1, required: true %>
   </div>
 
   <div class="space-y-4">

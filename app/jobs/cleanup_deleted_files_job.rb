@@ -11,6 +11,8 @@ class CleanupDeletedFilesJob < ApplicationJob
 
   private
     def cleanup_deleted_files(backup)
+      return if backup.account_hold_reason
+
       backup.validate_destination!(inspect_tree: true)
       config_file = generate_config(backup)
       deleted_path = backup.deleted_rclone_base_path("destination")

@@ -18,6 +18,7 @@ class Provider < ApplicationRecord
   encrypts :access_key_id
   encrypts :secret_access_key
 
+  has_one :account_backup, foreign_key: :source_provider_id, dependent: :restrict_with_error
   has_many :storages, dependent: :destroy
 
   validates :name, presence: true
@@ -27,6 +28,7 @@ class Provider < ApplicationRecord
   validates :endpoint, presence: true, if: :cloudflare_r2?
   validate :valid_local_root, if: :local?
   validate :storage_type_unchanged
+  validate :account_source_capability, if: :provider_type_changed?
 
   after_save :ensure_local_storage, if: :local?
 
@@ -65,6 +67,12 @@ class Provider < ApplicationRecord
       self.base_path = LocalPath.new(base_path).root!
     rescue LocalPath::Error => e
       errors.add(:base_path, e.message)
+    end
+
+    def account_source_capability
+      if !supports_source? && account_backup
+        errors.add(:provider_type, "must support source usage while an account backup is configured")
+      end
     end
 
     def storage_type_unchanged

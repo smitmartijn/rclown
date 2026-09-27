@@ -5,6 +5,16 @@ Rails.application.routes.draw do
 
   resource :dashboard, only: :show, controller: "dashboard"
 
+  resources :account_backups do
+    member do
+      post :preview
+      post :activate
+      post :discover
+      patch :pause
+    end
+    resources :buckets, only: :update, module: :account_backups
+  end
+
   resources :providers do
     scope module: :providers do
       resource :connection_test, only: :create

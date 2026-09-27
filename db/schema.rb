@@ -10,7 +10,59 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_27_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_27_170000) do
+  create_table "account_backup_buckets", force: :cascade do |t|
+    t.integer "account_backup_id", null: false
+    t.boolean "available", default: true, null: false
+    t.integer "backup_id"
+    t.string "bucket_name", null: false
+    t.datetime "created_at", null: false
+    t.string "last_error"
+    t.datetime "last_seen_at"
+    t.string "resolution"
+    t.datetime "updated_at", null: false
+    t.index ["account_backup_id", "bucket_name"], name: "idx_on_account_backup_id_bucket_name_b7beaeccd0", unique: true
+    t.index ["account_backup_id"], name: "index_account_backup_buckets_on_account_backup_id"
+    t.index ["backup_id"], name: "index_account_backup_buckets_on_backup_id", unique: true
+  end
+
+  create_table "account_backup_discovery_runs", force: :cascade do |t|
+    t.integer "account_backup_id", null: false
+    t.json "counts", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.string "error"
+    t.datetime "finished_at"
+    t.boolean "preview", default: false, null: false
+    t.json "results", default: [], null: false
+    t.datetime "started_at"
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_backup_id"], name: "index_account_backup_discovery_runs_on_account_backup_id"
+  end
+
+  create_table "account_backups", force: :cascade do |t|
+    t.datetime "activated_at"
+    t.boolean "backups_enabled", default: true, null: false
+    t.integer "comparison_mode", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.string "destination_prefix"
+    t.integer "destination_storage_id", null: false
+    t.boolean "discovery_enabled", default: true, null: false
+    t.integer "discovery_interval_minutes", default: 60, null: false
+    t.json "excluded_buckets", default: [], null: false
+    t.json "excluded_patterns", default: [], null: false
+    t.string "name", null: false
+    t.datetime "next_discovery_at"
+    t.integer "retention_days", default: 30, null: false
+    t.string "schedule", default: "daily", null: false
+    t.integer "source_provider_id", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "verify_enabled", default: true, null: false
+    t.decimal "verify_tolerance_percent", default: "0.1", null: false
+    t.index ["destination_storage_id"], name: "index_account_backups_on_destination_storage_id"
+    t.index ["source_provider_id"], name: "index_account_backups_on_source_provider_id", unique: true
+  end
+
   create_table "backup_runs", force: :cascade do |t|
     t.integer "backup_id", null: false
     t.datetime "created_at", null: false
@@ -87,6 +139,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_150000) do
     t.index ["provider_id"], name: "index_storages_on_provider_id"
   end
 
+  add_foreign_key "account_backup_buckets", "account_backups"
+  add_foreign_key "account_backup_buckets", "backups"
+  add_foreign_key "account_backup_discovery_runs", "account_backups"
+  add_foreign_key "account_backups", "providers", column: "source_provider_id"
+  add_foreign_key "account_backups", "storages", column: "destination_storage_id"
   add_foreign_key "backup_runs", "backups"
   add_foreign_key "backups", "storages", column: "destination_storage_id"
   add_foreign_key "backups", "storages", column: "source_storage_id"
