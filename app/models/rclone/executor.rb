@@ -14,6 +14,7 @@ class Rclone::Executor
 
   def run
     validate_storage_usage!
+    backup.validate_destination!(inspect_tree: true)
     @config_file = generate_config
     result = execute_rclone(@config_file)
 
@@ -37,6 +38,7 @@ class Rclone::Executor
 
     def execute_rclone(config_file)
       command = build_command(config_file)
+      backup_run.update!(source_rclone_path: command[2], destination_rclone_path: command[3])
       backup_run.append_log("Running: #{command.join(' ')}\n\n")
 
       exit_code = nil

@@ -57,7 +57,7 @@ rclone delete dest:.deleted/backups/{id}/ --min-age {retention_days}d
 rclone rmdirs dest:.deleted/backups/{id}/ --leave-root
 ```
 
-The `--min-age` flag uses actual file metadata (upload time), not folder names, so cleanup works correctly regardless of directory structure.
+The `--min-age` flag uses file modification time, not folder names or time since deletion; see the caveat below.
 
 ### Configuration
 
@@ -72,3 +72,33 @@ Initially we used `--suffix -2026-01-19` which appends dates to filenames. We sw
 2. **Easier bulk operations** - Delete entire date folder vs filtering by suffix
 3. **No filename pollution** - Original filenames preserved
 4. **Simpler mental model** - "Files deleted on Jan 19" vs "files ending in -2026-01-19"
+
+## Local filesystem destinations
+
+A local provider has one automatically created root storage. Each backup must
+choose a nonempty relative destination path, keeping live data separate from
+retention. No local rclone remote is configured; [rclone accepts filesystem
+paths directly](https://rclone.org/local/).
+
+For a base path of `/backups`, backup ID 5 and destination path
+`cloudflare/my-bucket`, the commands use:
+
+```sh
+rclone sync source:my-bucket /backups/cloudflare/my-bucket \
+  --backup-dir /backups/.deleted/backups/5/2026-09-27/cloudflare/my-bucket
+rclone delete /backups/.deleted/backups/5 --min-age 30d
+rclone rmdirs /backups/.deleted/backups/5 --leave-root
+```
+
+The normal config and other execution flags still apply. The same retention
+period, scheduling, history, dry runs, verification and notifications apply.
+All local targets, including cleanup paths, pass through the same containment
+and symlink checks. `.deleted` is reserved and cannot be a live destination.
+
+Retention preserves the existing algorithm: `--min-age` uses **file modification
+time**, not the date folder or the time the file was deleted. Local moves
+preserve modification times, so an old file moved into retention today may be
+removed at the next cleanup. This is not a guarantee of 30 days after deletion.
+Also, successive versions of the same file archived on the same date share a
+path and can overwrite one another, as with existing cloud destinations. See
+[rclone backup-dir semantics](https://rclone.org/docs/#backup-dir-string).

@@ -9,6 +9,7 @@ Rclown wraps the battle-tested [rclone](https://rclone.org/) in a simple interfa
 ## Features
 
 - **Multi-provider support**: Cloudflare R2, Backblaze B2, Amazon S3
+- **Local destinations**: Back up cloud buckets to a local directory or Docker-mounted NAS storage ([setup](docs/docker-deployment.md#back-up-cloud-buckets-to-a-nas--local-filesystem))
 - **Bucket discovery**: Automatically find and import buckets from your providers
 - **Scheduled backups**: Daily or weekly, with dry-run support
 - **Flexible paths**: Back up entire buckets or specific sub-paths
@@ -52,6 +53,11 @@ bundle install
 bin/rails db:setup
 bin/dev
 ```
+
+Tests use Minitest (`bin/rails test`) and headless Chrome (`bin/rails test:system`).
+Install `rclone` to include the real filesystem sync/retention integration test;
+that test skips when the executable is unavailable. Cloud credentials are not
+needed for the tests.
 
 ## Contributing
 

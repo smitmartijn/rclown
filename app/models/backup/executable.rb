@@ -6,8 +6,7 @@ module Backup::Executable
 
     runs.create!(
       dry_run: dry_run,
-      source_rclone_path: source_rclone_path,
-      destination_rclone_path: destination_rclone_path
+      **run_paths
     ).tap do |run|
       run.execute_later
     end
@@ -24,4 +23,13 @@ module Backup::Executable
   def last_successful_run
     runs.successful.order(finished_at: :desc).first
   end
+
+  private
+    def run_paths
+      { source_rclone_path: source_rclone_path, destination_rclone_path: destination_rclone_path }
+    rescue Provider::LocalPath::Error
+      # Still enqueue a run so an unavailable mount is recorded in history and
+      # triggers the normal failure notification when the worker checks again.
+      {}
+    end
 end

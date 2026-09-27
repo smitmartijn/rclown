@@ -44,6 +44,6 @@ class ProvidersController < ApplicationController
     end
 
     def provider_params
-      params.require(:provider).permit(:name, :provider_type, :endpoint, :region, :access_key_id, :secret_access_key)
+      params.require(:provider).permit(:name, :provider_type, :endpoint, :region, :access_key_id, :secret_access_key, :base_path)
     end
 end

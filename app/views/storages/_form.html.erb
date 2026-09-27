@@ -12,34 +12,42 @@
 
   <div>
     <%= form.label :provider_id, "Provider", class: "block text-sm font-semibold text-gray-700 mb-2" %>
-    <%= form.collection_select :provider_id, Provider.order(:name), :id, :name, { include_blank: "Select a provider" }, {} %>
+    <%= form.collection_select :provider_id, Provider.available_as_source.or(Provider.where(id: storage.provider_id)).order(:name), :id, :name, { include_blank: "Select a provider" }, { disabled: storage.persisted? && storage.provider.local? } %>
   </div>
 
-  <div>
-    <%= form.label :bucket_name, class: "block text-sm font-semibold text-gray-700 mb-2" %>
-    <%= form.text_field :bucket_name, class: "font-mono", placeholder: "my-bucket-name" %>
-    <p class="mt-2 text-sm text-gray-500">The name of the bucket in your storage provider.</p>
-  </div>
+  <% unless storage.provider&.local? %>
+    <div>
+      <%= form.label :bucket_name, class: "block text-sm font-semibold text-gray-700 mb-2" %>
+      <%= form.text_field :bucket_name, class: "font-mono", placeholder: "my-bucket-name" %>
+      <p class="mt-2 text-sm text-gray-500">The name of the bucket in your storage provider.</p>
+    </div>
+  <% else %>
+    <p class="text-sm text-gray-600">Base path: <code><%= storage.provider.base_path %></code>. Set the destination path on each backup.</p>
+  <% end %>
 
   <div>
     <%= form.label :display_name, class: "block text-sm font-semibold text-gray-700 mb-2" %>
     <%= form.text_field :display_name, placeholder: "My Primary Backup" %>
-    <p class="mt-2 text-sm text-gray-500">Optional friendly name for this storage. Defaults to bucket name.</p>
+    <p class="mt-2 text-sm text-gray-500">Optional friendly name for this storage. Defaults to the bucket or local provider name.</p>
   </div>
 
-  <div>
-    <%= form.label :usage_type, "Usage Restriction", class: "block text-sm font-semibold text-gray-700 mb-2" %>
-    <div class="flex gap-3">
-      <% [["", "Both"], ["source_only", "Source only"], ["destination_only", "Destination only"]].each do |value, label_text| %>
-        <div class="flex-1">
-          <%= form.radio_button :usage_type, value, class: "sr-only peer" %>
-          <%= form.label :usage_type, value: value, class: "flex items-center justify-center px-4 py-3 border-2 rounded-xl cursor-pointer transition-colors border-gray-200 hover:border-gray-300 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:hover:border-blue-400" do %>
-            <span class="text-sm font-medium text-gray-700"><%= label_text %></span>
-          <% end %>
-        </div>
-      <% end %>
+  <% unless storage.provider&.local? %>
+    <div>
+      <%= form.label :usage_type, "Usage Restriction", class: "block text-sm font-semibold text-gray-700 mb-2" %>
+      <div class="flex gap-3">
+        <% [["", "Both"], ["source_only", "Source only"], ["destination_only", "Destination only"]].each do |value, label_text| %>
+          <div class="flex-1">
+            <%= form.radio_button :usage_type, value, class: "sr-only peer" %>
+            <%= form.label :usage_type, value: value, class: "flex items-center justify-center px-4 py-3 border-2 rounded-xl cursor-pointer transition-colors border-gray-200 hover:border-gray-300 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:hover:border-blue-400" do %>
+              <span class="text-sm font-medium text-gray-700"><%= label_text %></span>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
     </div>
-  </div>
+  <% else %>
+    <p class="text-sm text-gray-600">Local storage is destination-only.</p>
+  <% end %>
 
   <div class="flex items-center justify-end gap-x-4 border-t border-gray-200 pt-6">
     <%= link_to "Cancel", storage.persisted? ? storage : storages_path, class: "px-4 py-3 text-sm font-semibold text-gray-600 hover:text-gray-900" %>

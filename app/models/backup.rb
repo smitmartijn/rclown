@@ -15,16 +15,17 @@ class Backup < ApplicationRecord
   validate :source_and_destination_differ
   validate :source_storage_allows_source_usage
   validate :destination_storage_allows_destination_usage
+  validate :valid_destination_path
 
   before_validation :generate_name, if: -> { name.blank? && source_storage && destination_storage }
 
   # Path methods for rclone commands
   def source_rclone_path(remote_name = "source")
-    build_rclone_path(source_storage.bucket_name, source_path, remote_name)
+    source_storage.rclone_path(remote_name, path: source_path)
   end
 
   def destination_rclone_path(remote_name = "destination")
-    build_rclone_path(destination_storage.bucket_name, destination_path, remote_name)
+    destination_storage.rclone_path(remote_name, path: destination_path)
   end
 
   def deleted_rclone_path(remote_name = "destination", date: Date.current)
@@ -34,13 +35,13 @@ class Backup < ApplicationRecord
     # 3. Organize by date for easy browsing and cleanup
     parts = [ ".deleted", "backups", id.to_s, date.iso8601 ]
     parts << destination_path if destination_path.present?
-    build_rclone_path(destination_storage.bucket_name, parts.join("/"), remote_name)
+    destination_storage.rclone_path(remote_name, path: parts.join("/"), retention: true)
   end
 
   def deleted_rclone_base_path(remote_name = "destination")
     # Base path for cleanup - without date, so we can clean all date folders
     parts = [ ".deleted", "backups", id.to_s ]
-    build_rclone_path(destination_storage.bucket_name, parts.join("/"), remote_name)
+    destination_storage.rclone_path(remote_name, path: parts.join("/"), retention: true)
   end
 
   # Full paths for display
@@ -49,7 +50,13 @@ class Backup < ApplicationRecord
   end
 
   def destination_full_path
-    destination_path.present? ? "#{destination_storage.bucket_name}/#{destination_path}" : destination_storage.bucket_name
+    destination_path.present? ? "#{destination_storage.root_name}/#{destination_path}" : destination_storage.root_name
+  end
+
+  def validate_destination!(inspect_tree: false)
+    provider = destination_storage.provider
+    provider.validate_destination!(destination_path, inspect_tree: inspect_tree)
+    provider.validate_destination!(".deleted/backups/#{id}", retention: true, inspect_tree: inspect_tree)
   end
 
   def latest_size
@@ -110,8 +117,10 @@ class Backup < ApplicationRecord
   end
 
   private
-    def build_rclone_path(bucket_name, path, remote_name)
-      path.present? ? "#{remote_name}:#{bucket_name}/#{path}" : "#{remote_name}:#{bucket_name}"
+    def valid_destination_path
+      destination_storage&.provider&.validate_destination!(destination_path)
+    rescue Provider::LocalPath::Error => e
+      errors.add(:destination_path, e.message)
     end
 
     def generate_name

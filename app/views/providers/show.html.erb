@@ -20,24 +20,32 @@
             </span>
           </dd>
         </div>
-        <% if @provider.endpoint.present? %>
+        <% if @provider.local? %>
+          <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-900">Base path</dt>
+            <dd class="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0 font-mono"><%= @provider.base_path %></dd>
+          </div>
+        <% end %>
+        <% if @provider.endpoint.present? && !@provider.local? %>
           <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt class="text-sm font-medium text-gray-900">Endpoint</dt>
             <dd class="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0 font-mono"><%= @provider.endpoint %></dd>
           </div>
         <% end %>
-        <% if @provider.region.present? %>
+        <% if @provider.region.present? && !@provider.local? %>
           <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt class="text-sm font-medium text-gray-900">Region</dt>
             <dd class="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0"><%= @provider.region %></dd>
           </div>
         <% end %>
-        <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-900">Access Key ID</dt>
-          <dd class="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0 font-mono">
-            <%= @provider.access_key_id.first(4) %>****<%= @provider.access_key_id.last(4) %>
-          </dd>
-        </div>
+        <% unless @provider.local? %>
+          <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-900">Access Key ID</dt>
+            <dd class="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0 font-mono">
+              <%= @provider.access_key_id.first(4) %>****<%= @provider.access_key_id.last(4) %>
+            </dd>
+          </div>
+        <% end %>
         <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
           <dt class="text-sm font-medium text-gray-900">Created</dt>
           <dd class="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0"><%= @provider.created_at.strftime("%B %d, %Y at %I:%M %p") %></dd>
@@ -46,36 +54,40 @@
     </div>
   </div>
 
-  <%# Bucket Discovery %>
-  <div class="bg-white rounded-2xl border-2 border-gray-200">
-    <div class="px-4 py-6 sm:px-6 flex items-center justify-between">
-      <h3 class="text-base font-semibold text-gray-900">Buckets</h3>
-      <%= link_to provider_buckets_path(@provider), data: { turbo_frame: dom_id(@provider, :buckets) }, class: "text-sm font-medium text-blue-600 hover:text-blue-500" do %>
-        Refresh
-      <% end %>
+  <% if @provider.supports_bucket_discovery? %>
+    <%# Bucket Discovery %>
+    <div class="bg-white rounded-2xl border-2 border-gray-200">
+      <div class="px-4 py-6 sm:px-6 flex items-center justify-between">
+        <h3 class="text-base font-semibold text-gray-900">Buckets</h3>
+        <%= link_to provider_buckets_path(@provider), data: { turbo_frame: dom_id(@provider, :buckets) }, class: "text-sm font-medium text-blue-600 hover:text-blue-500" do %>
+          Refresh
+        <% end %>
+      </div>
+      <div class="border-t border-gray-100">
+        <%= turbo_frame_tag dom_id(@provider, :buckets), src: provider_buckets_path(@provider), loading: :lazy do %>
+          <div class="px-4 py-8 text-center">
+            <div class="inline-block animate-spin rounded-full size-6 border-2 border-gray-300 border-t-blue-600"></div>
+            <p class="mt-2 text-sm text-gray-500">Loading buckets...</p>
+          </div>
+        <% end %>
+      </div>
     </div>
-    <div class="border-t border-gray-100">
-      <%= turbo_frame_tag dom_id(@provider, :buckets), src: provider_buckets_path(@provider), loading: :lazy do %>
-        <div class="px-4 py-8 text-center">
-          <div class="inline-block animate-spin rounded-full size-6 border-2 border-gray-300 border-t-blue-600"></div>
-          <p class="mt-2 text-sm text-gray-500">Loading buckets...</p>
-        </div>
-      <% end %>
-    </div>
-  </div>
+  <% else %>
+    <p class="text-sm text-gray-600">This destination is ready to use. Create a backup and choose a relative destination path, such as cloudflare/my-bucket. Subdirectories are created during the backup.</p>
+  <% end %>
 
   <%# Imported Storages %>
   <% if @provider.storages.any? %>
     <div class="bg-white rounded-2xl border-2 border-gray-200">
       <div class="px-4 py-6 sm:px-6">
-        <h3 class="text-base font-semibold text-gray-900">Imported Storages</h3>
+        <h3 class="text-base font-semibold text-gray-900"><%= @provider.local? ? "Local Storage" : "Imported Storages" %></h3>
       </div>
       <div class="border-t border-gray-100">
         <ul role="list" class="divide-y divide-gray-100">
           <% @provider.storages.each do |storage| %>
             <li class="flex items-center justify-between gap-x-6 px-4 py-4 sm:px-6">
               <div class="min-w-0">
-                <p class="text-sm font-medium text-gray-900"><%= storage.display_name.presence || storage.bucket_name %></p>
+                <p class="text-sm font-medium text-gray-900"><%= storage.name %></p>
               </div>
               <%= link_to "View", storage, class: "text-sm font-medium text-blue-600 hover:text-blue-500" %>
             </li>

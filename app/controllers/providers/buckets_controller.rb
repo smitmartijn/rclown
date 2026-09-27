@@ -1,6 +1,7 @@
 module Providers
   class BucketsController < ApplicationController
     include ProviderScoped
+    before_action :require_bucket_discovery
 
     def index
       @buckets = @provider.discover_buckets
@@ -20,5 +21,10 @@ module Providers
         redirect_to @provider, notice: "Bucket '#{bucket_name}' imported as storage."
       end
     end
+
+    private
+      def require_bucket_discovery
+        head :unprocessable_entity unless @provider.supports_bucket_discovery?
+      end
   end
 end

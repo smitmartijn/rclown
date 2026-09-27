@@ -11,11 +11,15 @@ class CleanupDeletedFilesJob < ApplicationJob
 
   private
     def cleanup_deleted_files(backup)
+      backup.validate_destination!(inspect_tree: true)
       config_file = generate_config(backup)
       deleted_path = backup.deleted_rclone_base_path("destination")
 
       delete_old_files(config_file, deleted_path, backup.retention_days)
+      backup.validate_destination!(inspect_tree: true)
       remove_empty_dirs(config_file, deleted_path)
+    rescue Provider::LocalPath::Error => e
+      Rails.logger.warn "[CleanupDeletedFilesJob] Backup ##{backup.id}: #{e.message}"
     ensure
       cleanup_config(config_file)
     end

@@ -3,7 +3,11 @@ module Providers
     include ProviderScoped
 
     def create
-      @provider.discover_buckets
+      if @provider.supports_bucket_discovery?
+        @provider.discover_buckets
+      else
+        Provider::LocalPath.new(@provider.base_path).root!
+      end
       @success = true
       @message = "Connection successful"
     rescue Rclone::Error => e

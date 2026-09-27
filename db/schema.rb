@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_25_052302) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_27_150000) do
   create_table "backup_runs", force: :cascade do |t|
     t.integer "backup_id", null: false
     t.datetime "created_at", null: false
@@ -65,13 +65,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_25_052302) do
   end
 
   create_table "providers", force: :cascade do |t|
-    t.string "access_key_id", null: false
+    t.string "access_key_id"
+    t.string "base_path"
     t.datetime "created_at", null: false
     t.string "endpoint"
     t.string "name", null: false
     t.string "provider_type", null: false
     t.string "region"
-    t.string "secret_access_key", null: false
+    t.string "secret_access_key"
     t.datetime "updated_at", null: false
   end
 

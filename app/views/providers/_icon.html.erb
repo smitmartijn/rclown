@@ -2,7 +2,7 @@
 <% provider_type = local_assigns[:provider_type] || provider&.provider_type %>
 <% size_class = local_assigns[:size_class] || "size-5" %>
 
-<% if provider_type.present? %>
+<% if provider_type.present? && provider_type != "local" %>
   <%= image_tag "providers/#{provider_type}.png", class: "#{size_class} object-contain rounded", alt: provider_type.titleize %>
 <% else %>
   <svg class="<%= size_class %> text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

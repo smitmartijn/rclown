@@ -8,12 +8,14 @@ class Storage < ApplicationRecord
 
   validates :bucket_name, presence: true
   validate :usage_type_compatible_with_existing_backups, if: :usage_type_changed?
+  validate :local_root_storage
+  validate :provider_compatible_with_existing_backups, if: :provider_id_changed?
 
-  scope :available_as_source, -> { where(usage_type: [ nil, :source_only ]) }
+  scope :available_as_source, -> { where(usage_type: [ nil, :source_only ], provider_id: Provider.available_as_source.select(:id)) }
   scope :available_as_destination, -> { where(usage_type: [ nil, :destination_only ]) }
 
   def available_as_source?
-    usage_type.nil? || usage_type_source_only?
+    provider.supports_source? && (usage_type.nil? || usage_type_source_only?)
   end
 
   def available_as_destination?
@@ -22,11 +24,15 @@ class Storage < ApplicationRecord
   validates :bucket_name, uniqueness: { scope: :provider_id, message: "already exists for this provider" }
 
   def name
-    display_name.presence || bucket_name
+    display_name.presence || (provider.local? ? provider.name : bucket_name)
   end
 
-  def rclone_path(remote_name = "remote")
-    "#{remote_name}:#{bucket_name}"
+  def rclone_path(remote_name = "remote", path: nil, retention: false)
+    provider.rclone_target(bucket_name, path, remote_name: remote_name, retention: retention)
+  end
+
+  def root_name
+    provider.storage_root_name(bucket_name)
   end
 
   def backups
@@ -38,6 +44,22 @@ class Storage < ApplicationRecord
   end
 
   private
+    def local_root_storage
+      return unless provider&.local?
+
+      errors.add(:bucket_name, "must be . for a local provider root") unless bucket_name == "."
+      errors.add(:usage_type, "must be destination-only for local storage") unless usage_type_destination_only?
+    end
+
+    def provider_compatible_with_existing_backups
+      if persisted? && (provider&.local? || Provider.find_by(id: provider_id_was)&.local?)
+        errors.add(:provider, "cannot move an existing storage to or from a local provider; use its automatically created root storage")
+      end
+      if provider && !provider.supports_source? && source_backups.exists?
+        errors.add(:provider, "cannot be destination-only while this storage is used as a source")
+      end
+    end
+
     def usage_type_compatible_with_existing_backups
       if usage_type_destination_only? && source_backups.exists?
         errors.add(:usage_type, "cannot be changed to destination-only while this storage is used as a source in existing backups. Please update or remove those backups first.")

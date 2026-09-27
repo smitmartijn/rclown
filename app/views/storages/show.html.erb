@@ -21,8 +21,8 @@
           </dd>
         </div>
         <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-900">Bucket</dt>
-          <dd class="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0 font-mono"><%= @storage.bucket_name %></dd>
+          <dt class="text-sm font-medium text-gray-900"><%= @storage.provider.local? ? "Base path" : "Bucket" %></dt>
+          <dd class="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0 font-mono"><%= @storage.root_name %></dd>
         </div>
         <% if @storage.display_name.present? %>
           <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">

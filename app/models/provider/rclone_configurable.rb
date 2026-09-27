@@ -3,6 +3,8 @@ module Provider::RcloneConfigurable
 
   def rclone_config_section(name = "remote")
     case provider_type
+    when "local"
+      ""
     when "cloudflare_r2"
       cloudflare_r2_config(name)
     when "backblaze_b2"
