@@ -17,6 +17,7 @@ Rclown wraps the battle-tested [rclone](https://rclone.org/) in a simple interfa
 - **Retention policies**: Deleted files kept for configurable period before cleanup
 - **Comparison modes**: Size-only, checksum, or default (size + mtime) comparison
 - **Live logs**: Stream backup progress in real-time
+- **Stop running backups**: Stop an individual run from its details page, including during verification. The run shows “Stopping…” until the worker exits, then “Cancelled”; future scheduled runs remain enabled.
 - **Failure notifications**: Email alerts when backups fail
 - **System health**: Monitor CPU, memory, disk usage, and queue status
 

@@ -36,7 +36,9 @@ Rails.application.routes.draw do
       resource :cancellation, only: :create
       resource :enablement, only: [ :create, :destroy ]
       resource :dry_run, only: :create
-      resources :runs, only: [ :index, :show ]
+      resources :runs, only: [ :index, :show ] do
+        resource :cancellation, only: :create, module: :runs
+      end
     end
   end
 

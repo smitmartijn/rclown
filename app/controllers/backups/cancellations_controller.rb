@@ -4,7 +4,7 @@ module Backups
 
     def create
       @backup.cancel
-      redirect_to @backup, notice: "Backup cancelled."
+      redirect_to @backup, notice: "Stop requested for running backups.", status: :see_other
     end
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_27_170000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_28_120000) do
   create_table "account_backup_buckets", force: :cascade do |t|
     t.integer "account_backup_id", null: false
     t.boolean "available", default: true, null: false
@@ -65,6 +65,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_170000) do
 
   create_table "backup_runs", force: :cascade do |t|
     t.integer "backup_id", null: false
+    t.datetime "cancel_requested_at"
     t.datetime "created_at", null: false
     t.string "destination_rclone_path"
     t.boolean "dry_run", default: false, null: false

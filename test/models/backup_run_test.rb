@@ -1,6 +1,7 @@
 require "test_helper"
 
 class BackupRunTest < ActiveSupport::TestCase
+  include ActiveJob::TestHelper
   setup do
     @run = backup_runs(:pending_run)
     @running_run = backup_runs(:running_run)
@@ -104,6 +105,43 @@ class BackupRunTest < ActiveSupport::TestCase
   test "process_running? returns false for non-existent pid" do
     @running_run.rclone_pid = 999999999
     assert_not @running_run.process_running?
+  end
+
+  test "stop requested before a pid is recorded is preserved when the worker finishes" do
+    executor = Object.new
+    run = @run
+    executor.define_singleton_method(:run) do
+      BackupRun.find(run.id).cancel
+      { success: true, exit_code: 0 }
+    end
+
+    assert_no_enqueued_jobs(only: [ BackupSuccessNotificationJob, BackupFailureNotificationJob ]) do
+      Rclone::Executor.stub(:new, executor) { @run.execute }
+    end
+    assert @run.reload.cancelled?
+    assert @run.finished_at
+    assert_includes @run.raw_log, "Backup stopped by user"
+  end
+
+  test "worker errors after a stop request do not send failure notifications" do
+    executor = Object.new
+    run = @run
+    executor.define_singleton_method(:run) do
+      BackupRun.find(run.id).cancel
+      raise IOError, "stream closed"
+    end
+    assert_no_enqueued_jobs(only: BackupFailureNotificationJob) do
+      Rclone::Executor.stub(:new, executor) { @run.execute }
+    end
+    assert @run.reload.cancelled?
+  end
+
+  test "duplicate job delivery cannot restart a cancelled run" do
+    @run.update!(status: :cancelled, finished_at: Time.current)
+    Rclone::Executor.stub :new, ->(*) { flunk "must not restart a finished run" } do
+      @run.execute
+    end
+    assert @run.reload.cancelled?
   end
 
   # Runtime storage usage validation tests

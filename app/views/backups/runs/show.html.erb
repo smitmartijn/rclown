@@ -1,10 +1,18 @@
 <%= turbo_stream_from @backup %>
 
 <% page_header "Backup Run ##{@run.id}" do %>
-  <%= link_to "Back to Backup", @backup, class: "inline-flex items-center rounded-xl border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800/60" %>
+  <div class="flex flex-wrap items-center gap-3">
+    <% if @run.running? %>
+      <%= button_to @run.stopping? ? "Stopping…" : "Stop backup", backup_run_cancellation_path(@backup, @run), method: :post, disabled: @run.stopping?, class: "inline-flex items-center rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-500 disabled:opacity-50 disabled:cursor-wait", data: { turbo_submits_with: "Stopping…" } %>
+    <% end %>
+    <%= link_to "Back to Backup", @backup, class: "inline-flex items-center rounded-xl border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800/60" %>
+  </div>
 <% end %>
 
 <div class="space-y-6">
+  <% if @run.stopping? %>
+    <p role="status" class="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700 dark:border-yellow-900 dark:bg-yellow-950/60 dark:text-yellow-400">Waiting for the backup process to exit. This stops only the current run.</p>
+  <% end %>
   <%# Run Details %>
   <div class="bg-white dark:bg-slate-900 rounded-2xl border-2 border-gray-200 dark:border-slate-700">
     <div class="px-4 py-6 sm:px-6 flex items-center justify-between">
@@ -52,7 +60,7 @@
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
           </svg>
         <% end %>
-        <%= @run.status.capitalize %>
+        <%= @run.status_label %>
         <% if @run.dry_run? %> (Dry Run)<% end %>
       </span>
     </div>

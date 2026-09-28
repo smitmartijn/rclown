@@ -26,16 +26,21 @@ class BackupRun < ApplicationRecord
   after_create :update_backup_last_run_at
 
   def execute
+    claimed = with_lock do
+      touch
+      next false unless pending?
+      update!(status: :running, started_at: Time.current, worker_pid: Process.pid)
+      clear_log
+      true
+    end
+    return unless claimed
+
     backup.reload
     if reason = backup.account_hold_reason
       append_log("Skipped: #{reason}\n")
       update!(status: :skipped, finished_at: Time.current)
       return
     end
-
-    running!
-    update!(started_at: Time.current, worker_pid: Process.pid)
-    clear_log
 
     result = Rclone::Executor.new(self).run
 
@@ -83,28 +88,22 @@ class BackupRun < ApplicationRecord
 
   private
     def record_result(result)
-      update!(
-        status: result[:success] ? :success : :failed,
-        exit_code: result[:exit_code],
-        finished_at: Time.current
-      )
-
-      if result[:success]
-        notify_success
-      else
-        notify_failure
+      with_lock do
+        touch
+        next unless running?
+        if cancel_requested_at?
+          append_log("\nBackup stopped by user.\n")
+          update!(status: :cancelled, exit_code: result[:exit_code], finished_at: Time.current)
+        else
+          update!(status: result[:success] ? :success : :failed, exit_code: result[:exit_code], finished_at: Time.current)
+          result[:success] ? notify_success : notify_failure
+        end
       end
     end
 
     def record_failure(error)
       append_log("\n\nRuby Error: #{error.class}: #{error.message}\n#{error.backtrace&.first(10)&.join("\n")}")
-      update!(
-        status: :failed,
-        exit_code: -1,
-        finished_at: Time.current
-      )
-
-      notify_failure
+      record_result(success: false, exit_code: -1)
     end
 
     def update_backup_last_run_at

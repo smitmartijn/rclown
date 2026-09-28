@@ -50,13 +50,13 @@ class Rclone::LocalDestinationTest < ActiveSupport::TestCase
   test "sync output and failed status reach history and notifications" do
     @local_backup.update!(verify_enabled: false)
     run = @local_backup.execute
-    wait = Struct.new(:pid, :value).new(123, Struct.new(:exitstatus).new(5))
-    process = lambda do |*command, &block|
+    process = lambda do |command, **options, &block|
       assert_equal @local_backup.destination_rclone_path, command[3]
-      block.call(StringIO.new, StringIO.new("ERROR: permission denied accessing destination\n"), wait)
+      block.call("ERROR: permission denied accessing destination\n")
+      [ "", "", Struct.new(:exitstatus).new(5) ]
     end
     assert_enqueued_with(job: BackupFailureNotificationJob, args: [ run ]) do
-      Open3.stub(:popen2e, process) { run.execute }
+      Rclone::ProcessRunner.stub(:new, fake_runner(process)) { run.execute }
     end
     assert run.reload.failed?
     assert_equal 5, run.exit_code
@@ -66,17 +66,18 @@ class Rclone::LocalDestinationTest < ActiveSupport::TestCase
 
   test "success still verifies sizes updates history and notifies" do
     run = @local_backup.execute
-    wait = Struct.new(:pid, :value).new(123, Struct.new(:exitstatus).new(0))
-    process = ->(*args, &block) { block.call(StringIO.new, StringIO.new("Transferred: 1\n"), wait) }
     size_paths = []
-    sizes = lambda do |*command|
-      size_paths << command[2]
-      [ '{"count":1,"bytes":42}', "", Struct.new(:success?).new(true) ]
+    process = lambda do |command, **options, &block|
+      if command[1] == "sync"
+        block.call("Transferred: 1\n")
+        [ "", "", Struct.new(:exitstatus).new(0) ]
+      else
+        size_paths << command[2]
+        [ '{"count":1,"bytes":42}', "", Struct.new(:success?).new(true) ]
+      end
     end
     assert_enqueued_with(job: BackupSuccessNotificationJob, args: [ run ]) do
-      Open3.stub :popen2e, process do
-        Open3.stub(:capture3, sizes) { run.execute }
-      end
+      Rclone::ProcessRunner.stub(:new, fake_runner(process)) { run.execute }
     end
     assert run.reload.success?
     assert_equal @local_backup.destination_rclone_path, run.destination_rclone_path
@@ -97,10 +98,30 @@ class Rclone::LocalDestinationTest < ActiveSupport::TestCase
     assert_match(/Cannot access base directory/, run.raw_log)
   end
 
+  test "verification uses the cancellable runner and stops without failure notification" do
+    run = @local_backup.execute
+    commands = []
+    process = lambda do |command, **options, &block|
+      commands << command[1]
+      if command[1] == "sync"
+        [ "", "", Struct.new(:exitstatus).new(0) ]
+      else
+        BackupRun.find(run.id).cancel
+        raise Rclone::ProcessRunner::Cancelled
+      end
+    end
+    assert_no_enqueued_jobs(only: [ BackupSuccessNotificationJob, BackupFailureNotificationJob ]) do
+      Rclone::ProcessRunner.stub(:new, fake_runner(process)) { run.execute }
+    end
+    assert_equal %w[sync size], commands
+    assert run.reload.cancelled?
+    assert run.finished_at
+  end
+
   test "symlink inserted after configuration prevents starting rclone" do
     File.symlink("/etc", "#{@local_root}/cloudflare")
     run = @local_backup.execute
-    Open3.stub :popen2e, ->(*) { flunk "rclone must not run" } do
+    Rclone::ProcessRunner.stub :new, ->(*) { flunk "rclone must not run" } do
       run.execute
     end
     assert run.failed?
@@ -129,4 +150,10 @@ class Rclone::LocalDestinationTest < ActiveSupport::TestCase
     assert commands.any?
     assert commands.none? { |command| command[2].start_with?(@local_root) }
   end
+  private
+    def fake_runner(callback)
+      Object.new.tap do |runner|
+        runner.define_singleton_method(:run) { |*args, **options, &block| callback.call(*args, **options, &block) }
+      end
+    end
 end

@@ -8,23 +8,23 @@ module BackupRun::ProcessManageable
   end
 
   def cancel
-    return unless running? && rclone_pid.present?
-
-    begin
-      Process.kill("TERM", rclone_pid)
-      update!(
-        status: :cancelled,
-        finished_at: Time.current
-      )
-    rescue Errno::ESRCH
-      # Process already terminated
-      update!(
-        status: :cancelled,
-        finished_at: Time.current
-      )
-    rescue Errno::EPERM
-      append_log("\nFailed to cancel: permission denied")
+    with_lock do
+      touch
+      return false unless running?
+      unless cancel_requested_at?
+        update!(cancel_requested_at: Time.current)
+        append_log("\nStop requested by user. Waiting for the backup process to exit.\n")
+      end
+      true
     end
+  end
+
+  def stopping?
+    running? && cancel_requested_at?
+  end
+
+  def status_label
+    stopping? ? "Stopping…" : status.capitalize
   end
 
   def process_running?

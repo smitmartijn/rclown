@@ -23,6 +23,8 @@ class Rclone::Executor
     end
 
     result
+  rescue Rclone::ProcessRunner::Cancelled
+    { success: false, exit_code: nil }
   ensure
     cleanup_config(@config_file)
   end
@@ -41,33 +43,20 @@ class Rclone::Executor
       backup_run.update!(source_rclone_path: command[2], destination_rclone_path: command[3])
       backup_run.append_log("Running: #{command.join(' ')}\n\n")
 
-      exit_code = nil
-
-      Timeout.timeout(TIMEOUT.to_i) do
-        Open3.popen2e(*command) do |stdin, stdout_stderr, wait_thr|
-          stdin.close
-
-          backup_run.record_pid(wait_thr.pid)
-
-          stdout_stderr.each_line do |line|
-            backup_run.append_log(line)
-          end
-
-          exit_code = wait_thr.value.exitstatus
-        end
+      _, _, status = Rclone::ProcessRunner.new(backup_run).run(command, timeout: TIMEOUT.to_i, capture: false) do |line|
+        backup_run.append_log(line)
       end
-
+      exit_code = status.exitstatus
       { success: exit_code == 0, exit_code: exit_code }
     rescue Timeout::Error
       backup_run.append_log("\n\nERROR: Backup timed out after #{TIMEOUT.inspect}")
-      kill_process
       { success: false, exit_code: -2 }
     end
 
     def verify_backup(result)
       backup_run.append_log("\n")
 
-      source_size = Rclone::SizeChecker.new(@config_file, rclone_path: backup.source_rclone_path("source")).check
+      source_size = Rclone::SizeChecker.new(@config_file, rclone_path: backup.source_rclone_path("source"), backup_run: backup_run).check
       if source_size
         backup_run.append_log("[VERIFY] Source: #{source_size[:count]} objects, #{format_bytes(source_size[:bytes])}\n")
         backup_run.update!(source_count: source_size[:count], source_bytes: source_size[:bytes])
@@ -76,7 +65,7 @@ class Rclone::Executor
         return result
       end
 
-      dest_size = Rclone::SizeChecker.new(@config_file, rclone_path: backup.destination_rclone_path("destination"), excludes: ".deleted/**").check
+      dest_size = Rclone::SizeChecker.new(@config_file, rclone_path: backup.destination_rclone_path("destination"), excludes: ".deleted/**", backup_run: backup_run).check
       if dest_size
         backup_run.append_log("[VERIFY] Destination: #{dest_size[:count]} objects, #{format_bytes(dest_size[:bytes])}\n")
       else
@@ -166,18 +155,6 @@ class Rclone::Executor
         [ "--b2-upload-cutoff", "0" ]
       else
         []
-      end
-    end
-
-    def kill_process
-      return unless backup_run.rclone_pid
-
-      begin
-        Process.kill("TERM", backup_run.rclone_pid)
-        sleep 2
-        Process.kill("KILL", backup_run.rclone_pid) if backup_run.process_running?
-      rescue Errno::ESRCH, Errno::EPERM
-        # Process already terminated or we don't have permission
       end
     end
 
