@@ -18,7 +18,7 @@
   <% unless notifier.persisted? %>
     <div>
       <%= form.label :type, "Notifier Type", class: "block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2" %>
-      <div class="grid grid-cols-3 gap-3">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <% Notifier::NOTIFIER_TYPES.each do |type, name| %>
           <div>
             <%= form.radio_button :type, type, class: "sr-only peer", data: { action: "change->conditional-fields#toggle", conditional_fields_target: "radio" } %>
@@ -31,7 +31,7 @@
       </div>
     </div>
   <% else %>
-    <%= form.hidden_field :type, value: notifier.type %>
+    <%= form.hidden_field :type, value: notifier.type, data: { conditional_fields_target: "radio" } %>
   <% end %>
 
   <%# Email-specific fields %>
@@ -47,15 +47,17 @@
     </div>
   </div>
 
-  <%# Slack-specific fields %>
-  <div data-conditional-fields-target="fields" data-value="Notifiers::Slack" class="<%= 'hidden' unless notifier.is_a?(Notifiers::Slack) %>">
+  <%# Slack and Discord share the same webhook setting. %>
+  <% chat_notifier = notifier.is_a?(Notifiers::Slack) || notifier.is_a?(Notifiers::Discord) %>
+  <div data-conditional-fields-target="fields" data-value="Notifiers::Slack Notifiers::Discord" class="<%= 'hidden' unless chat_notifier %>">
     <div>
       <%= form.label :webhook_url, "Webhook URL", class: "block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2" %>
       <%= form.text_field :webhook_url,
-          value: notifier.is_a?(Notifiers::Slack) ? notifier.webhook_url : "",
-          placeholder: "https://hooks.slack.com/services/...",
+          value: chat_notifier ? notifier.webhook_url : "",
+          placeholder: "https://…",
           class: "font-mono" %>
-      <p class="mt-2 text-sm text-gray-500 dark:text-slate-400">Create an incoming webhook in your Slack workspace settings.</p>
+      <p data-conditional-fields-target="fields" data-value="Notifiers::Slack" class="mt-2 text-sm text-gray-500 dark:text-slate-400">Create an incoming webhook in your Slack workspace settings.</p>
+      <p data-conditional-fields-target="fields" data-value="Notifiers::Discord" class="mt-2 text-sm text-gray-500 dark:text-slate-400">Paste a Discord webhook URL, such as https://discord.com/api/webhooks/… . Create one in your channel's settings under Integrations → Webhooks.</p>
     </div>
   </div>
 

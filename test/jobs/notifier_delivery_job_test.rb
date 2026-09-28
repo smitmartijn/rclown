@@ -38,6 +38,33 @@ class NotifierDeliveryJobTest < ActiveJob::TestCase
     end
   end
 
+  test "delivers Discord notifications through the shared job and records success" do
+    url = "https://discord.com/api/webhooks/123/test-token"
+    notifier = Notifiers::Discord.create!(name: "Discord", config: { webhook_url: url }.to_json,
+      notify_on_success: true, last_error: "Previous failure")
+    request = stub_request(:post, "#{url}?wait=true").to_return(status: 200, body: '{"id":"123"}')
+
+    NotifierDeliveryJob.perform_now(notifier, backup_runs(:successful_run), :success)
+
+    assert_requested request
+    assert_not_nil notifier.reload.last_notified_at
+    assert_nil notifier.last_error
+  end
+
+  test "Discord rate limits record a safe error and retry delivery" do
+    url = "https://discord.com/api/webhooks/123/test-token"
+    notifier = Notifiers::Discord.create!(name: "Discord", config: { webhook_url: url }.to_json)
+    stub_request(:post, "#{url}?wait=true").to_return(status: 429, body: '{"message":"private response"}')
+
+    assert_enqueued_with(job: NotifierDeliveryJob, args: [ notifier, backup_runs(:failed_run), :failure ]) do
+      NotifierDeliveryJob.perform_now(notifier, backup_runs(:failed_run), :failure)
+    end
+
+    assert_not_nil notifier.reload.last_failed_at
+    assert_equal "Discord webhook failed (HTTP 429)", notifier.last_error
+    assert_nil notifier.last_notified_at
+  end
+
   test "skips success event when notify_on_success is false" do
     notifier = notifiers(:email_notifier)
     notifier.update!(notify_on_success: false)

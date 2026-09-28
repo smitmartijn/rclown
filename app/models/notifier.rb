@@ -2,6 +2,7 @@ class Notifier < ApplicationRecord
   NOTIFIER_TYPES = {
     "Notifiers::Email" => "Email",
     "Notifiers::Slack" => "Slack",
+    "Notifiers::Discord" => "Discord",
     "Notifiers::Webhook" => "Webhook"
   }.freeze
 

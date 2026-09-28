@@ -38,11 +38,11 @@
               <%= @notifier.recipients.join(", ") %>
             </dd>
           </div>
-        <% when "Notifiers::Slack" %>
+        <% when "Notifiers::Slack", "Notifiers::Discord" %>
           <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt class="text-sm font-medium text-gray-900 dark:text-slate-100">Webhook URL</dt>
             <dd class="mt-1 text-sm text-gray-700 dark:text-slate-200 sm:col-span-2 sm:mt-0 font-mono truncate">
-              <%= @notifier.webhook_url&.truncate(50) %>
+              <%= @notifier.is_a?(Notifiers::Discord) ? "Configured (token hidden)" : @notifier.webhook_url&.truncate(50) %>
             </dd>
           </div>
         <% when "Notifiers::Webhook" %>

@@ -8,10 +8,10 @@ export default class extends Controller {
   }
 
   toggle() {
-    const selectedValue = this.radioTargets.find(radio => radio.checked)?.value
+    const selectedValue = this.radioTargets.find(radio => radio.checked || radio.type === "hidden")?.value
 
     this.fieldsTargets.forEach(el => {
-      el.classList.toggle("hidden", el.dataset.value !== selectedValue)
+      el.classList.toggle("hidden", !el.dataset.value.split(" ").includes(selectedValue))
     })
   }
 }
