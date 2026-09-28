@@ -7,6 +7,11 @@ class Backup < ApplicationRecord
   belongs_to :destination_storage, class_name: "Storage"
 
   has_many :runs, class_name: "BackupRun", dependent: :destroy
+  has_one :health_check, class_name: "BackupHealthCheck", dependent: :destroy
+
+  def health_monitored?
+    enabled? && !account_backup_bucket&.account_backup&.exclusion_for(account_backup_bucket.bucket_name)
+  end
 
   def runs_by_day(days: 30)
     runs.where(dry_run: false, created_at: days.days.ago..).group_by { |r| r.created_at.to_date }

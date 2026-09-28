@@ -1,6 +1,11 @@
 # Recurring jobs configuration for Solid Queue
 
 production:
+  check_backup_health:
+    class: ScheduleBackupHealthChecksJob
+    queue: scheduler
+    schedule: every 5 minutes
+
   discover_account_buckets:
     class: ScheduleAccountBackupDiscoveriesJob
     queue: scheduler
@@ -21,6 +26,11 @@ production:
     schedule: every hour at minute 12
 
 development:
+  check_backup_health:
+    class: ScheduleBackupHealthChecksJob
+    queue: scheduler
+    schedule: every 5 minutes
+
   discover_account_buckets:
     class: ScheduleAccountBackupDiscoveriesJob
     queue: scheduler

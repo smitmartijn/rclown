@@ -1,4 +1,6 @@
-<% page_header "System Health" %>
+<% page_header "System Health" do %>
+  <%= link_to "JSON API", api_health_path, class: "text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline" %>
+<% end %>
 
 <div class="space-y-6">
   <% account_warnings = AccountBackup.active.filter_map { |account| (message = account.attention_message) ? [account, message] : nil } %>

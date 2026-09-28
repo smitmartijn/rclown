@@ -9,7 +9,7 @@ class Rclone::ProcessRunner
   POLL_INTERVAL = 0.25
   STOP_GRACE_PERIOD = 5
 
-  def initialize(backup_run)
+  def initialize(backup_run = nil)
     @backup_run = backup_run
   end
 
@@ -24,7 +24,7 @@ class Rclone::ProcessRunner
     Open3.popen3(*command) do |stdin, stdout, stderr, process|
       begin
         stdin.close
-        @backup_run.record_pid(process.pid)
+        @backup_run&.record_pid(process.pid)
         streams = { stdout => 0, stderr => 1 }
         buffers = { stdout => +"".b, stderr => +"".b }
 
@@ -70,13 +70,15 @@ class Rclone::ProcessRunner
         signal(process, "TERM")
         signal(process, "KILL") unless process.join(STOP_GRACE_PERIOD)
         process.join
-        @backup_run.update_column(:rclone_pid, nil)
+        @backup_run&.update_column(:rclone_pid, nil)
       end
     end
   end
 
   private
     def cancellation_requested?
+      return false unless @backup_run
+
       @backup_run.class.uncached do
         @backup_run.class.where(id: @backup_run.id).where.not(cancel_requested_at: nil).exists?
       end

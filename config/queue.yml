@@ -3,6 +3,11 @@ default: &default
     - polling_interval: 1
       batch_size: 500
   workers:
+    # Keep scheduling and health checks moving while all backup threads are busy.
+    - queues: [scheduler, health]
+      threads: 1
+      processes: 1
+      polling_interval: 0.5
     - queues: "*"
       threads: 3
       processes: <%= ENV.fetch("JOB_CONCURRENCY", 1) %>

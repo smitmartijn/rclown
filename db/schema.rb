@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_28_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_28_140000) do
   create_table "account_backup_buckets", force: :cascade do |t|
     t.integer "account_backup_id", null: false
     t.boolean "available", default: true, null: false
@@ -61,6 +61,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_28_120000) do
     t.decimal "verify_tolerance_percent", default: "0.1", null: false
     t.index ["destination_storage_id"], name: "index_account_backups_on_destination_storage_id"
     t.index ["source_provider_id"], name: "index_account_backups_on_source_provider_id", unique: true
+  end
+
+  create_table "backup_health_checks", force: :cascade do |t|
+    t.integer "backup_id", null: false
+    t.datetime "checked_at"
+    t.string "configuration_digest"
+    t.datetime "created_at", null: false
+    t.datetime "requested_at"
+    t.json "results", default: {}, null: false
+    t.datetime "updated_at", null: false
+    t.index ["backup_id"], name: "index_backup_health_checks_on_backup_id", unique: true
   end
 
   create_table "backup_runs", force: :cascade do |t|
@@ -145,6 +156,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_28_120000) do
   add_foreign_key "account_backup_discovery_runs", "account_backups"
   add_foreign_key "account_backups", "providers", column: "source_provider_id"
   add_foreign_key "account_backups", "storages", column: "destination_storage_id"
+  add_foreign_key "backup_health_checks", "backups"
   add_foreign_key "backup_runs", "backups"
   add_foreign_key "backups", "storages", column: "destination_storage_id"
   add_foreign_key "backups", "storages", column: "source_storage_id"

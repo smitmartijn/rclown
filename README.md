@@ -20,6 +20,7 @@ Rclown wraps the battle-tested [rclone](https://rclone.org/) in a simple interfa
 - **Stop running backups**: Stop an individual run from its details page, including during verification. The run shows “Stopping…” until the worker exits, then “Cancelled”; future scheduled runs remain enabled.
 - **Failure notifications**: Email alerts when backups fail
 - **System health**: Monitor CPU, memory, disk usage, and queue status
+- **Health API**: Monitor app availability, failed/missed backups, account discovery, and provider/destination checks through authenticated JSON with duration-aware grace periods ([setup](docs/health-api.md))
 
 ## Deployment
 
