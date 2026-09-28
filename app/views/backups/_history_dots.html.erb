@@ -4,7 +4,7 @@
     <%
       day_runs = runs_by_day[day] || []
       if day_runs.empty?
-        bar_class = "bg-gray-200"
+        bar_class = "bg-gray-200 dark:bg-slate-700"
         tooltip = "No runs"
       elsif day_runs.any?(&:success?)
         bar_class = "bg-green-500"
@@ -16,14 +16,14 @@
         bar_class = "bg-red-500"
         tooltip = "#{day_runs.count(&:failed?)} failed"
       else
-        bar_class = "bg-gray-300"
+        bar_class = "bg-gray-300 dark:bg-slate-600"
         tooltip = "#{day_runs.size} runs"
       end
     %>
     <div class="group relative flex-1 h-5 rounded-sm <%= bar_class %>">
       <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
         <%= day.strftime('%a, %b %-d, %Y') %>
-        <div class="text-gray-400"><%= tooltip %></div>
+        <div class="text-gray-400 dark:text-slate-400"><%= tooltip %></div>
         <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
       </div>
     </div>

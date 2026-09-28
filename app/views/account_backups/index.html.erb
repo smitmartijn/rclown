@@ -1,14 +1,14 @@
 <% page_header "Account backups" do %>
   <%= link_to "New account backup", new_account_backup_path, class: "rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-500" %>
 <% end %>
-<p class="mb-6 text-sm text-gray-600">Automatically discover buckets and create editable backups. New buckets inherit your defaults; existing backups keep their settings.</p>
-<div class="rounded-2xl border-2 border-gray-200 divide-y divide-gray-100">
+<p class="mb-6 text-sm text-gray-600 dark:text-slate-300">Automatically discover buckets and create editable backups. New buckets inherit your defaults; existing backups keep their settings.</p>
+<div class="rounded-2xl border-2 border-gray-200 dark:border-slate-700 divide-y divide-gray-100 dark:divide-slate-800">
   <% @account_backups.each do |account| %>
-    <%= link_to account, class: "block px-6 py-5 hover:bg-gray-50" do %>
-      <p class="font-semibold text-gray-900"><%= account.name %></p>
-      <p class="mt-1 text-sm text-gray-500"><%= account.source_provider.name %> → <%= account.destination_storage.name %> · Discovery <%= AccountBackup::INTERVALS.key(account.discovery_interval_minutes)&.downcase %></p>
-      <% if message = account.attention_message %><p class="mt-2 text-sm text-amber-700"><%= message %></p><% end %>
+    <%= link_to account, class: "block px-6 py-5 hover:bg-gray-50 dark:hover:bg-slate-800/60" do %>
+      <p class="font-semibold text-gray-900 dark:text-slate-100"><%= account.name %></p>
+      <p class="mt-1 text-sm text-gray-500 dark:text-slate-400"><%= account.source_provider.name %> → <%= account.destination_storage.name %> · Discovery <%= AccountBackup::INTERVALS.key(account.discovery_interval_minutes)&.downcase %></p>
+      <% if message = account.attention_message %><p class="mt-2 text-sm text-amber-700 dark:text-amber-400"><%= message %></p><% end %>
     <% end %>
   <% end %>
-  <% if @account_backups.empty? %><p class="px-6 py-8 text-sm text-gray-500">No account backups yet. Choose a source account and a destination to get started.</p><% end %>
+  <% if @account_backups.empty? %><p class="px-6 py-8 text-sm text-gray-500 dark:text-slate-400">No account backups yet. Choose a source account and a destination to get started.</p><% end %>
 </div>

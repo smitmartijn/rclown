@@ -1,8 +1,8 @@
 <%= form_with model: storage, class: "space-y-6" do |form| %>
   <% if storage.errors.any? %>
-    <div class="rounded-xl border-2 border-red-200 bg-red-50 p-4">
-      <h3 class="font-medium text-red-800"><%= pluralize(storage.errors.count, "error") %> prohibited this storage from being saved:</h3>
-      <ul class="mt-2 list-disc list-inside text-red-700">
+    <div class="rounded-xl border-2 border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/60 p-4">
+      <h3 class="font-medium text-red-800 dark:text-red-300"><%= pluralize(storage.errors.count, "error") %> prohibited this storage from being saved:</h3>
+      <ul class="mt-2 list-disc list-inside text-red-700 dark:text-red-400">
         <% storage.errors.each do |error| %>
           <li><%= error.full_message %></li>
         <% end %>
@@ -11,46 +11,46 @@
   <% end %>
 
   <div>
-    <%= form.label :provider_id, "Provider", class: "block text-sm font-semibold text-gray-700 mb-2" %>
+    <%= form.label :provider_id, "Provider", class: "block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2" %>
     <%= form.collection_select :provider_id, Provider.available_as_source.or(Provider.where(id: storage.provider_id)).order(:name), :id, :name, { include_blank: "Select a provider" }, { disabled: storage.persisted? && storage.provider.local? } %>
   </div>
 
   <% unless storage.provider&.local? %>
     <div>
-      <%= form.label :bucket_name, class: "block text-sm font-semibold text-gray-700 mb-2" %>
+      <%= form.label :bucket_name, class: "block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2" %>
       <%= form.text_field :bucket_name, class: "font-mono", placeholder: "my-bucket-name" %>
-      <p class="mt-2 text-sm text-gray-500">The name of the bucket in your storage provider.</p>
+      <p class="mt-2 text-sm text-gray-500 dark:text-slate-400">The name of the bucket in your storage provider.</p>
     </div>
   <% else %>
-    <p class="text-sm text-gray-600">Base path: <code><%= storage.provider.base_path %></code>. Set the destination path on each backup.</p>
+    <p class="text-sm text-gray-600 dark:text-slate-300">Base path: <code><%= storage.provider.base_path %></code>. Set the destination path on each backup.</p>
   <% end %>
 
   <div>
-    <%= form.label :display_name, class: "block text-sm font-semibold text-gray-700 mb-2" %>
+    <%= form.label :display_name, class: "block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2" %>
     <%= form.text_field :display_name, placeholder: "My Primary Backup" %>
-    <p class="mt-2 text-sm text-gray-500">Optional friendly name for this storage. Defaults to the bucket or local provider name.</p>
+    <p class="mt-2 text-sm text-gray-500 dark:text-slate-400">Optional friendly name for this storage. Defaults to the bucket or local provider name.</p>
   </div>
 
   <% unless storage.provider&.local? %>
     <div>
-      <%= form.label :usage_type, "Usage Restriction", class: "block text-sm font-semibold text-gray-700 mb-2" %>
+      <%= form.label :usage_type, "Usage Restriction", class: "block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2" %>
       <div class="flex gap-3">
         <% [["", "Both"], ["source_only", "Source only"], ["destination_only", "Destination only"]].each do |value, label_text| %>
           <div class="flex-1">
             <%= form.radio_button :usage_type, value, class: "sr-only peer" %>
-            <%= form.label :usage_type, value: value, class: "flex items-center justify-center px-4 py-3 border-2 rounded-xl cursor-pointer transition-colors border-gray-200 hover:border-gray-300 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:hover:border-blue-400" do %>
-              <span class="text-sm font-medium text-gray-700"><%= label_text %></span>
+            <%= form.label :usage_type, value: value, class: "flex items-center justify-center px-4 py-3 border-2 rounded-xl cursor-pointer transition-colors border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600 peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-950/60 peer-checked:hover:border-blue-400" do %>
+              <span class="text-sm font-medium text-gray-700 dark:text-slate-200"><%= label_text %></span>
             <% end %>
           </div>
         <% end %>
       </div>
     </div>
   <% else %>
-    <p class="text-sm text-gray-600">Local storage is destination-only.</p>
+    <p class="text-sm text-gray-600 dark:text-slate-300">Local storage is destination-only.</p>
   <% end %>
 
-  <div class="flex items-center justify-end gap-x-4 border-t border-gray-200 pt-6">
-    <%= link_to "Cancel", storage.persisted? ? storage : storages_path, class: "px-4 py-3 text-sm font-semibold text-gray-600 hover:text-gray-900" %>
+  <div class="flex items-center justify-end gap-x-4 border-t border-gray-200 dark:border-slate-700 pt-6">
+    <%= link_to "Cancel", storage.persisted? ? storage : storages_path, class: "px-4 py-3 text-sm font-semibold text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-slate-100" %>
     <%= form.submit storage.persisted? ? "Update Storage" : "Create Storage", class: "rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-500 cursor-pointer" %>
   </div>
 <% end %>

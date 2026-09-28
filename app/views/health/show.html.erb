@@ -3,86 +3,86 @@
 <div class="space-y-6">
   <% account_warnings = AccountBackup.active.filter_map { |account| (message = account.attention_message) ? [account, message] : nil } %>
   <% if account_warnings.any? %>
-    <div class="rounded-2xl border-2 border-amber-200 p-6">
-      <h2 class="font-semibold text-gray-900">Account discovery</h2>
-      <% account_warnings.each do |account, message| %><p class="mt-2 text-sm text-amber-700"><%= link_to account.name, account, class: "underline" %>: <%= message %></p><% end %>
+    <div class="rounded-2xl border-2 border-amber-200 dark:border-amber-900 p-6">
+      <h2 class="font-semibold text-gray-900 dark:text-slate-100">Account discovery</h2>
+      <% account_warnings.each do |account, message| %><p class="mt-2 text-sm text-amber-700 dark:text-amber-400"><%= link_to account.name, account, class: "underline" %>: <%= message %></p><% end %>
     </div>
   <% end %>
   <%# System Stats %>
   <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-    <div class="rounded-2xl border-2 border-gray-200 px-4 py-5">
-      <dt class="text-sm font-medium text-gray-500">CPU</dt>
-      <dd class="mt-1 text-2xl font-semibold text-gray-900">
+    <div class="rounded-2xl border-2 border-gray-200 dark:border-slate-700 px-4 py-5">
+      <dt class="text-sm font-medium text-gray-500 dark:text-slate-400">CPU</dt>
+      <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-slate-100">
         <%= @system_health.cpu_usage ? "#{@system_health.cpu_usage}%" : "N/A" %>
       </dd>
     </div>
-    <div class="rounded-2xl border-2 border-gray-200 px-4 py-5">
-      <dt class="text-sm font-medium text-gray-500">Memory</dt>
+    <div class="rounded-2xl border-2 border-gray-200 dark:border-slate-700 px-4 py-5">
+      <dt class="text-sm font-medium text-gray-500 dark:text-slate-400">Memory</dt>
       <% if mem = @system_health.memory_usage %>
-        <dd class="mt-1 text-2xl font-semibold text-gray-900"><%= mem[:percentage] %>%</dd>
-        <dd class="text-xs text-gray-500"><%= mem[:used] %> / <%= mem[:total] %></dd>
+        <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-slate-100"><%= mem[:percentage] %>%</dd>
+        <dd class="text-xs text-gray-500 dark:text-slate-400"><%= mem[:used] %> / <%= mem[:total] %></dd>
       <% else %>
-        <dd class="mt-1 text-2xl font-semibold text-gray-900">N/A</dd>
+        <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-slate-100">N/A</dd>
       <% end %>
     </div>
-    <div class="rounded-2xl border-2 border-gray-200 px-4 py-5">
-      <dt class="text-sm font-medium text-gray-500">Disk</dt>
+    <div class="rounded-2xl border-2 border-gray-200 dark:border-slate-700 px-4 py-5">
+      <dt class="text-sm font-medium text-gray-500 dark:text-slate-400">Disk</dt>
       <% if disk = @system_health.disk_usage %>
-        <dd class="mt-1 text-2xl font-semibold text-gray-900"><%= disk[:percentage] %>%</dd>
-        <dd class="text-xs text-gray-500"><%= disk[:used] %> / <%= disk[:total] %></dd>
+        <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-slate-100"><%= disk[:percentage] %>%</dd>
+        <dd class="text-xs text-gray-500 dark:text-slate-400"><%= disk[:used] %> / <%= disk[:total] %></dd>
       <% else %>
-        <dd class="mt-1 text-2xl font-semibold text-gray-900">N/A</dd>
+        <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-slate-100">N/A</dd>
       <% end %>
     </div>
-    <div class="rounded-2xl border-2 border-gray-200 px-4 py-5">
-      <dt class="text-sm font-medium text-gray-500">Uptime</dt>
-      <dd class="mt-1 text-2xl font-semibold text-gray-900"><%= @system_health.uptime || "N/A" %></dd>
+    <div class="rounded-2xl border-2 border-gray-200 dark:border-slate-700 px-4 py-5">
+      <dt class="text-sm font-medium text-gray-500 dark:text-slate-400">Uptime</dt>
+      <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-slate-100"><%= @system_health.uptime || "N/A" %></dd>
     </div>
   </div>
 
   <%# Queue Stats %>
-  <div class="bg-white rounded-2xl border-2 border-gray-200">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl border-2 border-gray-200 dark:border-slate-700">
     <div class="px-4 py-6 sm:px-6">
-      <h3 class="text-base font-semibold text-gray-900">Job Queue</h3>
+      <h3 class="text-base font-semibold text-gray-900 dark:text-slate-100">Job Queue</h3>
     </div>
-    <div class="border-t border-gray-100">
-      <dl class="divide-y divide-gray-100">
+    <div class="border-t border-gray-100 dark:border-slate-800">
+      <dl class="divide-y divide-gray-100 dark:divide-slate-800">
         <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-900">Pending Jobs</dt>
-          <dd class="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0"><%= @queue_stats[:pending] %></dd>
+          <dt class="text-sm font-medium text-gray-900 dark:text-slate-100">Pending Jobs</dt>
+          <dd class="mt-1 text-sm text-gray-700 dark:text-slate-200 sm:col-span-2 sm:mt-0"><%= @queue_stats[:pending] %></dd>
         </div>
         <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-900">Scheduled Jobs</dt>
-          <dd class="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0"><%= @queue_stats[:scheduled] %></dd>
+          <dt class="text-sm font-medium text-gray-900 dark:text-slate-100">Scheduled Jobs</dt>
+          <dd class="mt-1 text-sm text-gray-700 dark:text-slate-200 sm:col-span-2 sm:mt-0"><%= @queue_stats[:scheduled] %></dd>
         </div>
         <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-900">In Progress</dt>
-          <dd class="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0"><%= @queue_stats[:in_progress] %></dd>
+          <dt class="text-sm font-medium text-gray-900 dark:text-slate-100">In Progress</dt>
+          <dd class="mt-1 text-sm text-gray-700 dark:text-slate-200 sm:col-span-2 sm:mt-0"><%= @queue_stats[:in_progress] %></dd>
         </div>
         <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-900">rclone Version</dt>
-          <dd class="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0 font-mono"><%= @system_health.rclone_version || "N/A" %></dd>
+          <dt class="text-sm font-medium text-gray-900 dark:text-slate-100">rclone Version</dt>
+          <dd class="mt-1 text-sm text-gray-700 dark:text-slate-200 sm:col-span-2 sm:mt-0 font-mono"><%= @system_health.rclone_version || "N/A" %></dd>
         </div>
       </dl>
     </div>
   </div>
 
   <%# Running Backups %>
-  <div class="bg-white rounded-2xl border-2 border-gray-200">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl border-2 border-gray-200 dark:border-slate-700">
     <div class="px-4 py-6 sm:px-6">
-      <h3 class="text-base font-semibold text-gray-900">Running Backups</h3>
+      <h3 class="text-base font-semibold text-gray-900 dark:text-slate-100">Running Backups</h3>
     </div>
-    <div class="border-t border-gray-100">
+    <div class="border-t border-gray-100 dark:border-slate-800">
       <% if @running_backups.any? %>
-        <ul role="list" class="divide-y divide-gray-100">
+        <ul role="list" class="divide-y divide-gray-100 dark:divide-slate-800">
           <% @running_backups.each do |run| %>
             <li>
-              <%= link_to backup_run_path(run.backup, run), class: "flex items-center justify-between px-4 py-4 hover:bg-gray-50 sm:px-6" do %>
+              <%= link_to backup_run_path(run.backup, run), class: "flex items-center justify-between px-4 py-4 hover:bg-gray-50 dark:hover:bg-slate-800/60 sm:px-6" do %>
                 <div class="min-w-0">
-                  <p class="text-base font-medium text-gray-900">
+                  <p class="text-base font-medium text-gray-900 dark:text-slate-100">
                     <%= run.backup.source_storage.name %> → <%= run.backup.destination_storage.name %>
                   </p>
-                  <p class="text-sm text-gray-600">
+                  <p class="text-sm text-gray-600 dark:text-slate-300">
                     Started <%= time_ago_in_words(run.started_at) %> ago
                     <% if run.rclone_pid %>
                       · PID: <%= run.rclone_pid %>
@@ -90,7 +90,7 @@
                   </p>
                 </div>
                 <% if stats = run.process_stats %>
-                  <div class="text-right text-sm text-gray-500">
+                  <div class="text-right text-sm text-gray-500 dark:text-slate-400">
                     <p>CPU: <%= stats[:cpu] %>%</p>
                     <p>Mem: <%= stats[:memory] %>%</p>
                   </div>
@@ -100,7 +100,7 @@
           <% end %>
         </ul>
       <% else %>
-        <div class="px-4 py-8 text-center text-sm text-gray-500">
+        <div class="px-4 py-8 text-center text-sm text-gray-500 dark:text-slate-400">
           No backups currently running.
         </div>
       <% end %>

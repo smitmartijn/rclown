@@ -1,27 +1,27 @@
 <div id="<%= dom_id(backup, :status) %>">
   <%
     if backup.running?
-      badge_class = "bg-blue-100 text-blue-700"
+      badge_class = "bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400"
       status_text = "Running"
       icon = :spinner
     elsif backup.account_hold_reason
-      badge_class = "bg-yellow-100 text-yellow-700"
+      badge_class = "bg-yellow-100 dark:bg-yellow-950/60 text-yellow-700 dark:text-yellow-400"
       status_text = "On hold"
       icon = :stop
     elsif backup.last_run&.success?
-      badge_class = "bg-green-100 text-green-700"
+      badge_class = "bg-green-100 dark:bg-green-950/60 text-green-700 dark:text-green-400"
       status_text = "Success"
       icon = :check
     elsif backup.last_run&.failed?
-      badge_class = "bg-red-100 text-red-700"
+      badge_class = "bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400"
       status_text = "Failed"
       icon = :x
     elsif backup.last_run&.cancelled?
-      badge_class = "bg-yellow-100 text-yellow-700"
+      badge_class = "bg-yellow-100 dark:bg-yellow-950/60 text-yellow-700 dark:text-yellow-400"
       status_text = "Cancelled"
       icon = :stop
     else
-      badge_class = "bg-gray-100 text-gray-600"
+      badge_class = "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300"
       status_text = "Pending"
       icon = :clock
     end

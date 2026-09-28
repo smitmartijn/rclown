@@ -1,28 +1,28 @@
-<li class="flex items-center justify-between gap-x-6 px-4 py-4 sm:px-6 hover:bg-gray-50">
+<li class="flex items-center justify-between gap-x-6 px-4 py-4 sm:px-6 hover:bg-gray-50 dark:hover:bg-slate-800/60">
   <div class="min-w-0 flex-1">
     <div class="flex items-center gap-x-3">
       <%= render "notifiers/icon", notifier: notifier %>
       <div>
-        <p class="text-sm font-semibold text-gray-900"><%= notifier.name %></p>
-        <p class="text-xs text-gray-500"><%= notifier.type_name %></p>
+        <p class="text-sm font-semibold text-gray-900 dark:text-slate-100"><%= notifier.name %></p>
+        <p class="text-xs text-gray-500 dark:text-slate-400"><%= notifier.type_name %></p>
       </div>
     </div>
   </div>
   <div class="flex items-center gap-x-4">
     <% if notifier.enabled? %>
-      <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+      <span class="inline-flex items-center rounded-full bg-green-50 dark:bg-green-950/60 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-400/30">
         Enabled
       </span>
     <% else %>
-      <span class="inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+      <span class="inline-flex items-center rounded-full bg-gray-50 dark:bg-slate-800/60 px-2 py-1 text-xs font-medium text-gray-600 dark:text-slate-300 ring-1 ring-inset ring-gray-500/10 dark:ring-slate-400/20">
         Disabled
       </span>
     <% end %>
     <% if notifier.last_notified_at %>
-      <span class="text-xs text-gray-500" title="Last notification sent">
+      <span class="text-xs text-gray-500 dark:text-slate-400" title="Last notification sent">
         <%= time_ago_in_words(notifier.last_notified_at) %> ago
       </span>
     <% end %>
-    <%= link_to "View", notifier_path(notifier), class: "text-sm font-medium text-blue-600 hover:text-blue-500" %>
+    <%= link_to "View", notifier_path(notifier), class: "text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300" %>
   </div>
 </li>

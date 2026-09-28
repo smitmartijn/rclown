@@ -6,74 +6,74 @@
       <%= button_to "Cancel", backup_cancellation_path(@backup), method: :post, class: "inline-flex items-center rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-500" %>
     <% else %>
       <%= button_to "Run Now", backup_execution_path(@backup), method: :post, class: "inline-flex items-center rounded-xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-500" %>
-      <%= button_to "Dry Run", backup_dry_run_path(@backup), method: :post, class: "inline-flex items-center rounded-xl border-2 border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50" %>
+      <%= button_to "Dry Run", backup_dry_run_path(@backup), method: :post, class: "inline-flex items-center rounded-xl border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800/60" %>
     <% end %>
-    <%= link_to "Edit", edit_backup_path(@backup), class: "inline-flex items-center rounded-xl border-2 border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50" %>
+    <%= link_to "Edit", edit_backup_path(@backup), class: "inline-flex items-center rounded-xl border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800/60" %>
   </div>
 <% end %>
 
 <div class="space-y-6">
   <% if @backup.account_backup %>
-    <p class="text-sm text-gray-600">Account: <%= link_to @backup.account_backup.name, @backup.account_backup, class: "text-blue-600 hover:underline" %>. Individual settings are preserved during discovery.</p>
-    <% if reason = @backup.account_hold_reason %><p class="text-sm text-amber-700"><%= reason %></p><% end %>
+    <p class="text-sm text-gray-600 dark:text-slate-300">Account: <%= link_to @backup.account_backup.name, @backup.account_backup, class: "text-blue-600 dark:text-blue-400 hover:underline" %>. Individual settings are preserved during discovery.</p>
+    <% if reason = @backup.account_hold_reason %><p class="text-sm text-amber-700 dark:text-amber-400"><%= reason %></p><% end %>
   <% end %>
   <%# Analytics Charts %>
   <%= render "backups/analytics", backup: @backup %>
 
   <%# Backup Details %>
-  <div class="bg-white rounded-2xl border-2 border-gray-200">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl border-2 border-gray-200 dark:border-slate-700">
     <div class="px-4 py-6 sm:px-6 flex items-center justify-between">
-      <h3 class="text-base font-semibold text-gray-900">Configuration</h3>
+      <h3 class="text-base font-semibold text-gray-900 dark:text-slate-100">Configuration</h3>
       <div class="flex items-center gap-x-2">
         <%= render "backups/status_badge", backup: @backup %>
         <% if @backup.enabled? %>
-          <%= button_to "Disable", backup_enablement_path(@backup), method: :delete, class: "text-sm text-gray-500 hover:text-gray-700" %>
+          <%= button_to "Disable", backup_enablement_path(@backup), method: :delete, class: "text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200" %>
         <% else %>
-          <%= button_to "Enable", backup_enablement_path(@backup), method: :post, class: "text-sm text-blue-600 hover:text-blue-500" %>
+          <%= button_to "Enable", backup_enablement_path(@backup), method: :post, class: "text-sm text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300" %>
         <% end %>
       </div>
     </div>
-    <div class="border-t border-gray-100">
-      <dl class="divide-y divide-gray-100">
+    <div class="border-t border-gray-100 dark:border-slate-800">
+      <dl class="divide-y divide-gray-100 dark:divide-slate-800">
         <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-900">Source</dt>
+          <dt class="text-sm font-medium text-gray-900 dark:text-slate-100">Source</dt>
           <dd class="mt-1 sm:col-span-2 sm:mt-0">
-            <%= link_to @backup.source_storage, class: "inline-flex items-center gap-2 rounded-xl border-2 border-gray-200 px-3 py-2 hover:border-gray-300" do %>
+            <%= link_to @backup.source_storage, class: "inline-flex items-center gap-2 rounded-xl border-2 border-gray-200 dark:border-slate-700 px-3 py-2 hover:border-gray-300 dark:hover:border-slate-600" do %>
               <%= render "providers/icon", provider: @backup.source_storage.provider, size_class: "size-5" %>
-              <span class="font-medium text-gray-900"><%= @backup.source_storage.name %></span>
-              <span class="text-sm text-gray-500"><%= @backup.source_storage.provider.name %></span>
+              <span class="font-medium text-gray-900 dark:text-slate-100"><%= @backup.source_storage.name %></span>
+              <span class="text-sm text-gray-500 dark:text-slate-400"><%= @backup.source_storage.provider.name %></span>
             <% end %>
-            <span class="ml-2 font-mono text-sm text-gray-500"><%= @backup.source_full_path %></span>
+            <span class="ml-2 font-mono text-sm text-gray-500 dark:text-slate-400"><%= @backup.source_full_path %></span>
           </dd>
         </div>
         <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-900">Destination</dt>
+          <dt class="text-sm font-medium text-gray-900 dark:text-slate-100">Destination</dt>
           <dd class="mt-1 sm:col-span-2 sm:mt-0">
-            <%= link_to @backup.destination_storage, class: "inline-flex items-center gap-2 rounded-xl border-2 border-gray-200 px-3 py-2 hover:border-gray-300" do %>
+            <%= link_to @backup.destination_storage, class: "inline-flex items-center gap-2 rounded-xl border-2 border-gray-200 dark:border-slate-700 px-3 py-2 hover:border-gray-300 dark:hover:border-slate-600" do %>
               <%= render "providers/icon", provider: @backup.destination_storage.provider, size_class: "size-5" %>
-              <span class="font-medium text-gray-900"><%= @backup.destination_storage.name %></span>
-              <span class="text-sm text-gray-500"><%= @backup.destination_storage.provider.name %></span>
+              <span class="font-medium text-gray-900 dark:text-slate-100"><%= @backup.destination_storage.name %></span>
+              <span class="text-sm text-gray-500 dark:text-slate-400"><%= @backup.destination_storage.provider.name %></span>
             <% end %>
-            <span class="ml-2 font-mono text-sm text-gray-500"><%= @backup.destination_full_path %></span>
+            <span class="ml-2 font-mono text-sm text-gray-500 dark:text-slate-400"><%= @backup.destination_full_path %></span>
           </dd>
         </div>
         <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-900">Schedule</dt>
-          <dd class="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0"><%= @backup.schedule.capitalize %></dd>
+          <dt class="text-sm font-medium text-gray-900 dark:text-slate-100">Schedule</dt>
+          <dd class="mt-1 text-sm text-gray-700 dark:text-slate-200 sm:col-span-2 sm:mt-0"><%= @backup.schedule.capitalize %></dd>
         </div>
         <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-900">Next Run</dt>
-          <dd class="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0">
+          <dt class="text-sm font-medium text-gray-900 dark:text-slate-100">Next Run</dt>
+          <dd class="mt-1 text-sm text-gray-700 dark:text-slate-200 sm:col-span-2 sm:mt-0">
             <% if @backup.enabled? && @backup.next_run_at %>
               <%= @backup.next_run_at.strftime("%B %d, %Y at %I:%M %p") %>
-              <span class="text-gray-400">(<%= time_ago_in_words(@backup.next_run_at) %> from now)</span>
+              <span class="text-gray-400 dark:text-slate-400">(<%= time_ago_in_words(@backup.next_run_at) %> from now)</span>
             <% else %>
-              <span class="text-gray-400">Disabled</span>
+              <span class="text-gray-400 dark:text-slate-400">Disabled</span>
             <% end %>
           </dd>
         </div>
         <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-900">Last 30 Days</dt>
+          <dt class="text-sm font-medium text-gray-900 dark:text-slate-100">Last 30 Days</dt>
           <dd class="mt-1 sm:col-span-2 sm:mt-0 flex items-center">
             <%= render "backups/history_dots", backup: @backup %>
           </dd>
@@ -83,18 +83,18 @@
   </div>
 
   <%# Recent Runs %>
-  <div class="bg-white rounded-2xl border-2 border-gray-200">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl border-2 border-gray-200 dark:border-slate-700">
     <div class="px-4 py-6 sm:px-6">
-      <h3 class="text-base font-semibold text-gray-900">Recent Runs</h3>
+      <h3 class="text-base font-semibold text-gray-900 dark:text-slate-100">Recent Runs</h3>
     </div>
-    <div class="border-t border-gray-100">
-      <ul id="<%= dom_id(@backup, :runs) %>" role="list" class="divide-y divide-gray-100">
+    <div class="border-t border-gray-100 dark:border-slate-800">
+      <ul id="<%= dom_id(@backup, :runs) %>" role="list" class="divide-y divide-gray-100 dark:divide-slate-800">
         <% @runs.each do |run| %>
           <%= render "backup_runs/run", run: run %>
         <% end %>
       </ul>
       <% if @runs.empty? %>
-        <div class="px-4 py-8 text-center text-sm text-gray-500">
+        <div class="px-4 py-8 text-center text-sm text-gray-500 dark:text-slate-400">
           No runs yet. Click "Run Now" to start your first backup.
         </div>
       <% end %>

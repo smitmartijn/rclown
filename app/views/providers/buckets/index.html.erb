@@ -4,32 +4,32 @@
       <svg class="mx-auto size-10 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
       </svg>
-      <p class="mt-2 text-sm text-red-600"><%= @error %></p>
-      <%= link_to "Retry", provider_buckets_path(@provider), data: { turbo_frame: dom_id(@provider, :buckets) }, class: "mt-3 inline-block text-sm font-medium text-blue-600 hover:text-blue-500" %>
+      <p class="mt-2 text-sm text-red-600 dark:text-red-400"><%= @error %></p>
+      <%= link_to "Retry", provider_buckets_path(@provider), data: { turbo_frame: dom_id(@provider, :buckets) }, class: "mt-3 inline-block text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300" %>
     </div>
   <% elsif @buckets.empty? %>
     <div class="px-4 py-6 text-center">
-      <p class="text-sm text-gray-500">No buckets found for this provider.</p>
+      <p class="text-sm text-gray-500 dark:text-slate-400">No buckets found for this provider.</p>
     </div>
   <% else %>
     <div data-controller="filter">
-      <div class="px-4 py-3 sm:px-6 border-b border-gray-100">
+      <div class="px-4 py-3 sm:px-6 border-b border-gray-100 dark:border-slate-800">
         <input type="text"
                data-filter-target="input"
                data-action="input->filter#filter"
                placeholder="Filter buckets…"
-               class="block w-full rounded-lg border-0 py-2 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm">
+               class="block w-full rounded-lg border-0 py-2 px-3 text-gray-900 dark:text-slate-100 ring-1 ring-inset ring-gray-300 dark:ring-slate-600 placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm">
       </div>
-      <ul role="list" class="divide-y divide-gray-100">
+      <ul role="list" class="divide-y divide-gray-100 dark:divide-slate-800">
         <% @buckets.each do |bucket_name| %>
           <li class="flex items-center justify-between gap-x-6 px-4 py-4 sm:px-6"
               data-filter-target="item"
               data-filter-text="<%= bucket_name %>">
             <div class="min-w-0">
-              <p class="text-base font-medium text-gray-900 font-mono"><%= bucket_name %></p>
+              <p class="text-base font-medium text-gray-900 dark:text-slate-100 font-mono"><%= bucket_name %></p>
             </div>
             <% if @provider.bucket_imported?(bucket_name) %>
-              <span class="inline-flex items-center gap-1 rounded-lg bg-green-100 px-2.5 py-1 text-sm font-medium text-green-700">
+              <span class="inline-flex items-center gap-1 rounded-lg bg-green-100 dark:bg-green-950/60 px-2.5 py-1 text-sm font-medium text-green-700 dark:text-green-400">
                 <svg class="size-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
                 </svg>
@@ -42,7 +42,7 @@
         <% end %>
       </ul>
       <div class="px-4 py-6 text-center hidden" data-filter-target="empty">
-        <p class="text-sm text-gray-500">No buckets match your filter.</p>
+        <p class="text-sm text-gray-500 dark:text-slate-400">No buckets match your filter.</p>
       </div>
     </div>
   <% end %>

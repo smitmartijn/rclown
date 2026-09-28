@@ -1,43 +1,43 @@
 <%= turbo_stream_from @account_backup %>
 <% page_header @account_backup.name do %>
-  <%= link_to "Edit defaults and exclusions", edit_account_backup_path(@account_backup), class: "rounded-xl border-2 border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700" %>
+  <%= link_to "Edit defaults and exclusions", edit_account_backup_path(@account_backup), class: "rounded-xl border-2 border-gray-200 dark:border-slate-700 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-slate-200" %>
 <% end %>
 <div class="space-y-6">
-  <div class="rounded-2xl border-2 border-gray-200 p-6 space-y-4">
-    <p class="text-sm text-gray-600"><%= @account_backup.source_provider.name %> → <%= @account_backup.destination_storage.name %> · Prefix: <code><%= @account_backup.destination_prefix.presence || "(none)" %></code></p>
-    <p class="text-sm text-gray-600">New backups: <%= @account_backup.schedule %>, <%= @account_backup.comparison_mode.humanize.downcase %>, <%= @account_backup.retention_days %> days retention, <%= @account_backup.backups_enabled? ? "enabled" : "disabled" %>. Individual backup edits are preserved.</p>
-    <% if message = @account_backup.attention_message %><p class="text-sm text-amber-700"><%= message %></p><% end %>
+  <div class="rounded-2xl border-2 border-gray-200 dark:border-slate-700 p-6 space-y-4">
+    <p class="text-sm text-gray-600 dark:text-slate-300"><%= @account_backup.source_provider.name %> → <%= @account_backup.destination_storage.name %> · Prefix: <code><%= @account_backup.destination_prefix.presence || "(none)" %></code></p>
+    <p class="text-sm text-gray-600 dark:text-slate-300">New backups: <%= @account_backup.schedule %>, <%= @account_backup.comparison_mode.humanize.downcase %>, <%= @account_backup.retention_days %> days retention, <%= @account_backup.backups_enabled? ? "enabled" : "disabled" %>. Individual backup edits are preserved.</p>
+    <% if message = @account_backup.attention_message %><p class="text-sm text-amber-700 dark:text-amber-400"><%= message %></p><% end %>
     <% last_success = @account_backup.discovery_runs.where(preview: false, status: [:success, :partial]).order(id: :desc).first %>
-    <p class="text-sm text-gray-500">Last completed discovery: <%= last_success&.finished_at&.to_fs(:long) || "Never" %>. Next check: <%= @account_backup.active? && @account_backup.discovery_enabled? ? (@account_backup.next_discovery_at&.to_fs(:long) || "Due now") : "Paused" %>.</p>
+    <p class="text-sm text-gray-500 dark:text-slate-400">Last completed discovery: <%= last_success&.finished_at&.to_fs(:long) || "Never" %>. Next check: <%= @account_backup.active? && @account_backup.discovery_enabled? ? (@account_backup.next_discovery_at&.to_fs(:long) || "Due now") : "Paused" %>.</p>
     <div class="flex flex-wrap gap-3">
-      <%= button_to "Preview buckets", preview_account_backup_path(@account_backup), class: "rounded-xl border-2 border-gray-200 px-4 py-2 text-sm font-semibold" %>
+      <%= button_to "Preview buckets", preview_account_backup_path(@account_backup), class: "rounded-xl border-2 border-gray-200 dark:border-slate-700 px-4 py-2 text-sm font-semibold" %>
       <% if @account_backup.active? %>
         <%= button_to "Discover now", discover_account_backup_path(@account_backup), disabled: !@account_backup.discovery_enabled?, class: "rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50" %>
-        <%= button_to @account_backup.discovery_enabled? ? "Pause discovery" : "Resume discovery", pause_account_backup_path(@account_backup), method: :patch, class: "rounded-xl border-2 border-gray-200 px-4 py-2 text-sm font-semibold" %>
+        <%= button_to @account_backup.discovery_enabled? ? "Pause discovery" : "Resume discovery", pause_account_backup_path(@account_backup), method: :patch, class: "rounded-xl border-2 border-gray-200 dark:border-slate-700 px-4 py-2 text-sm font-semibold" %>
       <% else %>
         <%= button_to "Activate account backup", activate_account_backup_path(@account_backup), disabled: @account_backup.discovery_runs.in_progress.exists?, class: "rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50" %>
       <% end %>
     </div>
-    <p class="text-xs text-gray-500">Discovery sees only buckets accessible to your credentials. Pausing discovery leaves existing backups running. Exclusion does not cancel an already running backup.</p>
+    <p class="text-xs text-gray-500 dark:text-slate-400">Discovery sees only buckets accessible to your credentials. Pausing discovery leaves existing backups running. Exclusion does not cancel an already running backup.</p>
   </div>
 
   <% if latest = @runs.first %>
-    <div class="rounded-2xl border-2 border-gray-200 overflow-hidden">
+    <div class="rounded-2xl border-2 border-gray-200 dark:border-slate-700 overflow-hidden">
       <div class="p-6">
-        <h2 class="font-semibold text-gray-900"><%= latest.preview? ? "Bucket preview" : "Latest discovery" %> — <%= latest.status.humanize %></h2>
-        <p class="mt-2 text-sm text-gray-500"><%= latest.counts.map { |key, count| "#{account_discovery_action(key)}: #{count}" }.join(" · ") %></p>
-        <% if latest.error? %><p class="mt-2 text-sm text-red-700"><%= latest.error %></p><% end %>
-        <% if latest.pending? || latest.running? %><p class="mt-2 text-sm text-gray-500">Discovery is in progress. <%= link_to "Refresh status", @account_backup, class: "text-blue-600" %>. If this remains pending, check that the job worker is running.</p><% end %>
-        <% if latest.finished_at && latest.results.empty? && !latest.failed? %><p class="mt-2 text-sm text-amber-700">No buckets were returned. Check the source credentials' listing permissions.</p><% end %>
-        <% if latest.results.any? && latest.results.all? { |result| result["action"] == "excluded" } %><p class="mt-2 text-sm text-amber-700">All visible buckets are excluded. This configuration will not back up any of them.</p><% end %>
+        <h2 class="font-semibold text-gray-900 dark:text-slate-100"><%= latest.preview? ? "Bucket preview" : "Latest discovery" %> — <%= latest.status.humanize %></h2>
+        <p class="mt-2 text-sm text-gray-500 dark:text-slate-400"><%= latest.counts.map { |key, count| "#{account_discovery_action(key)}: #{count}" }.join(" · ") %></p>
+        <% if latest.error? %><p class="mt-2 text-sm text-red-700 dark:text-red-400"><%= latest.error %></p><% end %>
+        <% if latest.pending? || latest.running? %><p class="mt-2 text-sm text-gray-500 dark:text-slate-400">Discovery is in progress. <%= link_to "Refresh status", @account_backup, class: "text-blue-600 dark:text-blue-400" %>. If this remains pending, check that the job worker is running.</p><% end %>
+        <% if latest.finished_at && latest.results.empty? && !latest.failed? %><p class="mt-2 text-sm text-amber-700 dark:text-amber-400">No buckets were returned. Check the source credentials' listing permissions.</p><% end %>
+        <% if latest.results.any? && latest.results.all? { |result| result["action"] == "excluded" } %><p class="mt-2 text-sm text-amber-700 dark:text-amber-400">All visible buckets are excluded. This configuration will not back up any of them.</p><% end %>
       </div>
       <% if latest.results.any? %>
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm text-left">
-            <thead class="bg-gray-50 text-gray-600"><tr><th class="px-6 py-3">Bucket</th><th class="px-6 py-3">Destination</th><th class="px-6 py-3">Action</th></tr></thead>
-            <tbody class="divide-y divide-gray-100">
+            <thead class="bg-gray-50 dark:bg-slate-800/60 text-gray-600 dark:text-slate-300"><tr><th class="px-6 py-3">Bucket</th><th class="px-6 py-3">Destination</th><th class="px-6 py-3">Action</th></tr></thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-slate-800">
               <% latest.results.each do |result| %>
-                <tr><td class="px-6 py-3 font-mono"><%= result["bucket_name"] %></td><td class="px-6 py-3 font-mono break-all"><%= result["destination"] %></td><td class="px-6 py-3"><%= account_discovery_action(result["action"]) %><p class="mt-1 text-xs text-gray-500"><%= result["message"] %></p></td></tr>
+                <tr><td class="px-6 py-3 font-mono"><%= result["bucket_name"] %></td><td class="px-6 py-3 font-mono break-all"><%= result["destination"] %></td><td class="px-6 py-3"><%= account_discovery_action(result["action"]) %><p class="mt-1 text-xs text-gray-500 dark:text-slate-400"><%= result["message"] %></p></td></tr>
               <% end %>
             </tbody>
           </table>
@@ -47,41 +47,41 @@
   <% end %>
 
   <% if @buckets.any? %>
-    <div class="rounded-2xl border-2 border-gray-200 divide-y divide-gray-100">
-      <h2 class="p-6 font-semibold text-gray-900">Managed buckets</h2>
+    <div class="rounded-2xl border-2 border-gray-200 dark:border-slate-700 divide-y divide-gray-100 dark:divide-slate-800">
+      <h2 class="p-6 font-semibold text-gray-900 dark:text-slate-100">Managed buckets</h2>
       <% @buckets.each do |bucket| %>
         <div class="p-6 space-y-3">
-          <p class="font-mono font-medium text-gray-900"><%= bucket.bucket_name %></p>
-          <% if reason = bucket.hold_reason %><p class="text-sm text-amber-700"><%= reason %></p><% end %>
-          <% if bucket.last_error? %><p class="text-sm text-red-700"><%= bucket.last_error %></p><% end %>
+          <p class="font-mono font-medium text-gray-900 dark:text-slate-100"><%= bucket.bucket_name %></p>
+          <% if reason = bucket.hold_reason %><p class="text-sm text-amber-700 dark:text-amber-400"><%= reason %></p><% end %>
+          <% if bucket.last_error? %><p class="text-sm text-red-700 dark:text-red-400"><%= bucket.last_error %></p><% end %>
           <% if backup = bucket.backup %>
-            <p class="text-sm text-gray-600"><%= link_to backup.name, backup, class: "text-blue-600 hover:underline" %> · <%= backup.enabled? ? "Enabled" : "Disabled" %> · Last run: <%= backup.last_run&.status || "None" %></p>
-            <p class="text-sm font-mono text-gray-500"><%= backup.destination_full_path %></p>
-            <%= button_to "Detach backup", account_backup_bucket_path(@account_backup, bucket), method: :patch, params: { operation: "detach" }, class: "text-sm text-gray-600 hover:underline", data: { turbo_confirm: "Keep this backup independent and exclude the bucket from automatic creation? Held backups will remain disabled." } %>
+            <p class="text-sm text-gray-600 dark:text-slate-300"><%= link_to backup.name, backup, class: "text-blue-600 dark:text-blue-400 hover:underline" %> · <%= backup.enabled? ? "Enabled" : "Disabled" %> · Last run: <%= backup.last_run&.status || "None" %></p>
+            <p class="text-sm font-mono text-gray-500 dark:text-slate-400"><%= backup.destination_full_path %></p>
+            <%= button_to "Detach backup", account_backup_bucket_path(@account_backup, bucket), method: :patch, params: { operation: "detach" }, class: "text-sm text-gray-600 dark:text-slate-300 hover:underline", data: { turbo_confirm: "Keep this backup independent and exclude the bucket from automatic creation? Held backups will remain disabled." } %>
           <% elsif !bucket.hold_reason %>
             <% candidates = Backup.joins(:source_storage).where(storages: { provider_id: @account_backup.source_provider_id, bucket_name: bucket.bucket_name }).where(source_path: [nil, ""]).left_joins(:account_backup_bucket).where(account_backup_buckets: { id: nil }) %>
             <% if candidates.any? %>
               <%= form_with url: account_backup_bucket_path(@account_backup, bucket), method: :patch, class: "flex flex-wrap gap-3" do |form| %>
                 <%= hidden_field_tag :operation, "link" %>
                 <%= select_tag :backup_id, options_for_select(candidates.map { |candidate| ["#{candidate.name} — #{candidate.destination_full_path}", candidate.id] }), aria: { label: "Existing backup for #{bucket.bucket_name}" } %>
-                <%= form.submit "Link existing", class: "rounded-xl border-2 border-gray-200 px-4 py-2 text-sm font-semibold cursor-pointer" %>
+                <%= form.submit "Link existing", class: "rounded-xl border-2 border-gray-200 dark:border-slate-700 px-4 py-2 text-sm font-semibold cursor-pointer" %>
               <% end %>
             <% end %>
-            <%= button_to "Create another", account_backup_bucket_path(@account_backup, bucket), method: :patch, params: { operation: "create" }, class: "text-sm text-blue-600 hover:underline", data: { turbo_confirm: "Create a backup using the current defaults? Conflicting destination paths will still be rejected." } %>
+            <%= button_to "Create another", account_backup_bucket_path(@account_backup, bucket), method: :patch, params: { operation: "create" }, class: "text-sm text-blue-600 dark:text-blue-400 hover:underline", data: { turbo_confirm: "Create a backup using the current defaults? Conflicting destination paths will still be rejected." } %>
           <% end %>
           <% unless @account_backup.exclusion_for(bucket.bucket_name) %>
-            <%= button_to "Exclude bucket", account_backup_bucket_path(@account_backup, bucket), method: :patch, params: { operation: "exclude" }, class: "text-sm text-gray-600 hover:underline" %>
+            <%= button_to "Exclude bucket", account_backup_bucket_path(@account_backup, bucket), method: :patch, params: { operation: "exclude" }, class: "text-sm text-gray-600 dark:text-slate-300 hover:underline" %>
           <% end %>
         </div>
       <% end %>
     </div>
   <% end %>
 
-  <details class="rounded-2xl border-2 border-gray-200 p-6">
+  <details class="rounded-2xl border-2 border-gray-200 dark:border-slate-700 p-6">
     <summary class="font-semibold cursor-pointer">Discovery history</summary>
-    <ul class="mt-4 space-y-2 text-sm text-gray-600">
+    <ul class="mt-4 space-y-2 text-sm text-gray-600 dark:text-slate-300">
       <% @runs.each do |run| %><li><%= run.created_at.to_fs(:long) %> · <%= run.preview? ? "Preview" : "Discovery" %> · <%= run.status.humanize %> <%= run.error %></li><% end %>
     </ul>
   </details>
-  <%= button_to "Delete account configuration", @account_backup, method: :delete, class: "text-sm font-semibold text-red-600", data: { turbo_confirm: "Delete only this account configuration? Backups, files and history will remain. Enabled backups will continue independently; excluded or unavailable backups will remain disabled." } %>
+  <%= button_to "Delete account configuration", @account_backup, method: :delete, class: "text-sm font-semibold text-red-600 dark:text-red-400", data: { turbo_confirm: "Delete only this account configuration? Backups, files and history will remain. Enabled backups will continue independently; excluded or unavailable backups will remain disabled." } %>
 </div>

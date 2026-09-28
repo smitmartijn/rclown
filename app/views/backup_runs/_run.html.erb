@@ -1,23 +1,23 @@
 <li id="<%= dom_id(run) %>">
-  <%= link_to backup_run_path(run.backup, run), class: "flex items-center justify-between gap-x-6 px-4 py-4 sm:px-6 hover:bg-gray-50" do %>
+  <%= link_to backup_run_path(run.backup, run), class: "flex items-center justify-between gap-x-6 px-4 py-4 sm:px-6 hover:bg-gray-50 dark:hover:bg-slate-800/60" do %>
     <div class="flex min-w-0 gap-x-4">
       <%
         case run.status
         when "success"
-          icon_bg = "border-green-200 bg-green-50"
-          icon_color = "text-green-600"
+          icon_bg = "border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-950/60"
+          icon_color = "text-green-600 dark:text-green-400"
         when "failed"
-          icon_bg = "border-red-200 bg-red-50"
-          icon_color = "text-red-600"
+          icon_bg = "border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/60"
+          icon_color = "text-red-600 dark:text-red-400"
         when "running"
-          icon_bg = "border-blue-200 bg-blue-50"
-          icon_color = "text-blue-600"
+          icon_bg = "border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/60"
+          icon_color = "text-blue-600 dark:text-blue-400"
         when "cancelled"
-          icon_bg = "border-yellow-200 bg-yellow-50"
-          icon_color = "text-yellow-600"
+          icon_bg = "border-yellow-200 dark:border-yellow-900 bg-yellow-50 dark:bg-yellow-950/60"
+          icon_color = "text-yellow-600 dark:text-yellow-400"
         else
-          icon_bg = "border-gray-200 bg-gray-50"
-          icon_color = "text-gray-600"
+          icon_bg = "border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/60"
+          icon_color = "text-gray-600 dark:text-slate-300"
         end
       %>
       <div class="flex size-10 shrink-0 items-center justify-center rounded-xl border-2 <%= icon_bg %>">
@@ -41,13 +41,13 @@
         <% end %>
       </div>
       <div class="min-w-0 flex-auto">
-        <p class="text-base font-medium text-gray-900">
+        <p class="text-base font-medium text-gray-900 dark:text-slate-100">
           <%= run.status.capitalize %>
           <% if run.dry_run? %>
-            <span class="text-gray-500">(Dry Run)</span>
+            <span class="text-gray-500 dark:text-slate-400">(Dry Run)</span>
           <% end %>
         </p>
-        <p class="mt-1 text-sm text-gray-600">
+        <p class="mt-1 text-sm text-gray-600 dark:text-slate-300">
           <% if run.started_at %>
             Started <%= time_ago_in_words(run.started_at) %> ago
             <% if run.formatted_duration %>
@@ -61,9 +61,9 @@
     </div>
     <div class="flex shrink-0 items-center gap-x-4">
       <% if run.exit_code %>
-        <span class="text-sm text-gray-500">Exit code: <%= run.exit_code %></span>
+        <span class="text-sm text-gray-500 dark:text-slate-400">Exit code: <%= run.exit_code %></span>
       <% end %>
-      <svg class="size-5 flex-none text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+      <svg class="size-5 flex-none text-gray-400 dark:text-slate-400" viewBox="0 0 20 20" fill="currentColor">
         <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
       </svg>
     </div>

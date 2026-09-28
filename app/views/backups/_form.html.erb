@@ -1,8 +1,8 @@
 <%= form_with model: backup, class: "space-y-6", data: { controller: "backup-destination" } do |form| %>
   <% if backup.errors.any? %>
-    <div class="rounded-xl border-2 border-red-200 bg-red-50 p-4">
-      <h3 class="font-medium text-red-800"><%= pluralize(backup.errors.count, "error") %> prohibited this backup from being saved:</h3>
-      <ul class="mt-2 list-disc list-inside text-red-700">
+    <div class="rounded-xl border-2 border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/60 p-4">
+      <h3 class="font-medium text-red-800 dark:text-red-300"><%= pluralize(backup.errors.count, "error") %> prohibited this backup from being saved:</h3>
+      <ul class="mt-2 list-disc list-inside text-red-700 dark:text-red-400">
         <% backup.errors.each do |error| %>
           <li><%= error.full_message %></li>
         <% end %>
@@ -11,23 +11,23 @@
   <% end %>
 
   <% if backup.account_backup %>
-    <p class="text-sm text-gray-600">Managed by <%= link_to backup.account_backup.name, backup.account_backup, class: "text-blue-600" %>. Your settings will be preserved. To change the source, detach this backup on the account page. Deleting this backup also excludes its bucket from account discovery.</p>
+    <p class="text-sm text-gray-600 dark:text-slate-300">Managed by <%= link_to backup.account_backup.name, backup.account_backup, class: "text-blue-600 dark:text-blue-400" %>. Your settings will be preserved. To change the source, detach this backup on the account page. Deleting this backup also excludes its bucket from account discovery.</p>
   <% end %>
 
   <div class="flex items-start gap-4">
     <div class="flex-1 space-y-4">
       <div>
-        <%= form.label :source_storage_id, "Source", class: "block text-sm font-semibold text-gray-700 mb-2" %>
+        <%= form.label :source_storage_id, "Source", class: "block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2" %>
         <%= form.collection_select :source_storage_id, Storage.available_as_source.includes(:provider).order(:bucket_name), :id, ->(s) { "#{s.name} (#{s.provider.name})" }, { include_blank: "Select source" }, { autofocus: true, disabled: backup.account_backup.present? } %>
       </div>
       <div>
-        <%= form.label :source_path, "Source Path", class: "block text-sm font-semibold text-gray-700 mb-2" %>
+        <%= form.label :source_path, "Source Path", class: "block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2" %>
         <%= form.text_field :source_path, disabled: backup.account_backup.present?, class: "font-mono", placeholder: "path/within/bucket" %>
-        <p class="mt-1 text-xs text-gray-500">Optional path within the bucket</p>
+        <p class="mt-1 text-xs text-gray-500 dark:text-slate-400">Optional path within the bucket</p>
       </div>
     </div>
 
-    <div class="flex items-center pt-7 text-gray-400">
+    <div class="flex items-center pt-7 text-gray-400 dark:text-slate-400">
       <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
       </svg>
@@ -35,25 +35,25 @@
 
     <div class="flex-1 space-y-4">
       <div>
-        <%= form.label :destination_storage_id, "Destination", class: "block text-sm font-semibold text-gray-700 mb-2" %>
+        <%= form.label :destination_storage_id, "Destination", class: "block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2" %>
         <%= form.select :destination_storage_id, options_for_select(Storage.available_as_destination.includes(:provider).order(:bucket_name).map { |s| [ "#{s.name} (#{s.provider.name})", s.id, { "data-local": s.provider.local? } ] }, backup.destination_storage_id), { include_blank: "Select destination" }, { data: { backup_destination_target: "storage", action: "change->backup-destination#toggle" } } %>
       </div>
       <div>
-        <%= form.label :destination_path, "Destination Path", class: "block text-sm font-semibold text-gray-700 mb-2" %>
+        <%= form.label :destination_path, "Destination Path", class: "block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2" %>
         <%= form.text_field :destination_path, class: "font-mono", placeholder: "cloudflare/my-bucket", data: { backup_destination_target: "path" } %>
-        <p class="mt-1 text-xs text-gray-500" data-backup-destination-target="hint">Cloud: optional path within the bucket. Local: required relative path beneath the provider base directory.</p>
+        <p class="mt-1 text-xs text-gray-500 dark:text-slate-400" data-backup-destination-target="hint">Cloud: optional path within the bucket. Local: required relative path beneath the provider base directory.</p>
       </div>
     </div>
   </div>
 
   <div>
-    <%= form.label :schedule, class: "block text-sm font-semibold text-gray-700 mb-2" %>
+    <%= form.label :schedule, class: "block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2" %>
     <div class="flex gap-3">
       <% Backup.schedules.keys.each do |schedule| %>
         <div class="flex-1">
           <%= form.radio_button :schedule, schedule, class: "sr-only peer" %>
-          <%= form.label :schedule, value: schedule, class: "flex items-center justify-center px-4 py-3 border-2 rounded-xl cursor-pointer transition-colors border-gray-200 hover:border-gray-300 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:hover:border-blue-400" do %>
-            <span class="text-sm font-medium text-gray-700"><%= schedule.capitalize %></span>
+          <%= form.label :schedule, value: schedule, class: "flex items-center justify-center px-4 py-3 border-2 rounded-xl cursor-pointer transition-colors border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600 peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-950/60 peer-checked:hover:border-blue-400" do %>
+            <span class="text-sm font-medium text-gray-700 dark:text-slate-200"><%= schedule.capitalize %></span>
           <% end %>
         </div>
       <% end %>
@@ -61,46 +61,46 @@
   </div>
 
   <div>
-    <%= form.label :comparison_mode, "Comparison Mode", class: "block text-sm font-semibold text-gray-700 mb-2" %>
+    <%= form.label :comparison_mode, "Comparison Mode", class: "block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2" %>
     <div class="flex gap-3">
       <% { default: "Default", size_only: "Size Only", checksum: "Checksum" }.each do |mode, label| %>
         <div class="flex-1">
           <%= form.radio_button :comparison_mode, mode, class: "sr-only peer" %>
-          <%= form.label :comparison_mode, value: mode, class: "flex items-center justify-center px-4 py-3 border-2 rounded-xl cursor-pointer transition-colors border-gray-200 hover:border-gray-300 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:hover:border-blue-400" do %>
-            <span class="text-sm font-medium text-gray-700"><%= label %></span>
+          <%= form.label :comparison_mode, value: mode, class: "flex items-center justify-center px-4 py-3 border-2 rounded-xl cursor-pointer transition-colors border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600 peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-950/60 peer-checked:hover:border-blue-400" do %>
+            <span class="text-sm font-medium text-gray-700 dark:text-slate-200"><%= label %></span>
           <% end %>
         </div>
       <% end %>
     </div>
-    <p class="mt-2 text-xs text-gray-500">Default: size + modification time. Size Only: compare sizes only (good for migration). Checksum: compare by hash (thorough but slower).</p>
+    <p class="mt-2 text-xs text-gray-500 dark:text-slate-400">Default: size + modification time. Size Only: compare sizes only (good for migration). Checksum: compare by hash (thorough but slower).</p>
   </div>
 
   <div>
-    <%= form.label :retention_days, "Retention days", class: "block text-sm font-semibold text-gray-700 mb-2" %>
+    <%= form.label :retention_days, "Retention days", class: "block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2" %>
     <%= form.number_field :retention_days, min: 1, required: true %>
   </div>
 
   <div class="space-y-4">
-    <p class="text-sm font-semibold text-gray-700">Verification</p>
+    <p class="text-sm font-semibold text-gray-700 dark:text-slate-200">Verification</p>
     <div class="flex items-center gap-x-3">
-      <%= form.check_box :verify_enabled, class: "size-5 rounded-lg border-2 border-gray-300 text-blue-600 focus:ring-blue-500" %>
-      <%= form.label :verify_enabled, "Verify after sync", class: "text-sm text-gray-700" %>
+      <%= form.check_box :verify_enabled, class: "size-5 rounded-lg border-2 border-gray-300 dark:border-slate-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" %>
+      <%= form.label :verify_enabled, "Verify after sync", class: "text-sm text-gray-700 dark:text-slate-200" %>
     </div>
     <div class="flex items-center gap-2">
-      <%= form.label :verify_tolerance_percent, "Tolerance:", class: "text-sm text-gray-700" %>
+      <%= form.label :verify_tolerance_percent, "Tolerance:", class: "text-sm text-gray-700 dark:text-slate-200" %>
       <%= form.number_field :verify_tolerance_percent, step: 0.01, min: 0, max: 100, class: "w-24" %>
-      <span class="text-sm text-gray-600">%</span>
+      <span class="text-sm text-gray-600 dark:text-slate-300">%</span>
     </div>
-    <p class="text-xs text-gray-500">Compares object counts after sync. Tolerance allows for small differences due to continuous writes. Set to 0 for exact match, or disable verification entirely for busy buckets.</p>
+    <p class="text-xs text-gray-500 dark:text-slate-400">Compares object counts after sync. Tolerance allows for small differences due to continuous writes. Set to 0 for exact match, or disable verification entirely for busy buckets.</p>
   </div>
 
   <div class="flex items-center gap-x-3">
-    <%= form.check_box :enabled, class: "size-5 rounded-lg border-2 border-gray-300 text-blue-600 focus:ring-blue-500" %>
-    <%= form.label :enabled, "Enabled", class: "text-sm font-semibold text-gray-700" %>
+    <%= form.check_box :enabled, class: "size-5 rounded-lg border-2 border-gray-300 dark:border-slate-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500" %>
+    <%= form.label :enabled, "Enabled", class: "text-sm font-semibold text-gray-700 dark:text-slate-200" %>
   </div>
 
-  <div class="flex items-center justify-end gap-x-4 border-t border-gray-200 pt-6">
-    <%= link_to "Cancel", backup.persisted? ? backup : backups_path, class: "px-4 py-3 text-sm font-semibold text-gray-600 hover:text-gray-900" %>
+  <div class="flex items-center justify-end gap-x-4 border-t border-gray-200 dark:border-slate-700 pt-6">
+    <%= link_to "Cancel", backup.persisted? ? backup : backups_path, class: "px-4 py-3 text-sm font-semibold text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-slate-100" %>
     <%= form.submit backup.persisted? ? "Update Backup" : "Create Backup", class: "rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-500 cursor-pointer" %>
   </div>
 <% end %>
